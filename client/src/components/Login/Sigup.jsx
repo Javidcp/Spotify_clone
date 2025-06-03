@@ -49,34 +49,39 @@ const Sigup = () => {
         }
     };
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        
-        try {
-            const dob = `${dobYear}-${dobMonth.padStart(2,'0')}-${dobDay.padStart(2,'0')}`;
+const handleRegister = async (e) => {
+    e.preventDefault();
 
-            const userData = {
+    try {
+        const dob = `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`;
+
+        const userData = {
             username: name,
             email,
             password,
             dateOfBirth: dob,
-            gender
-            }
+            gender,
+        };
 
-            const res = await api.post("/auth/register", userData, {
-                withCredentials: true
-            });
-            console.log("User registered:", res.data);
+        const res = await api.post("/auth/register", userData, {
+            withCredentials: true,
+        });
 
-            dispatch(setUser(res.data.user));
-            dispatch(setAuth(true));
+        console.log("User registered:", res.data);
 
-            navigate("/");
-            setView(1)
-        } catch (error) {
-            console.error(error.response?.data?.message || "Registration failed");
-        }
-    };
+        localStorage.setItem("accessToken", res.data.token);
+
+        dispatch(setUser(res.data.user));
+        dispatch(setAuth(true));
+
+        navigate("/");
+        setView(1);
+    } catch (error) {
+        console.error(error.response?.data?.message || "Registration failed");
+        alert(error.response?.data?.message || "Registration failed");
+    }
+};
+
 
 
 
@@ -110,6 +115,21 @@ const Sigup = () => {
         </div>
     );
 
+
+    const fetchUser = async () => {
+        try {
+        const token = localStorage.getItem("accessToken");
+        const res = await api.get("/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data);
+        } catch (error) {
+        console.error("Failed to fetch user:", error);
+        }
+    };
+
+
+
     return (
         <>
             { view === 1 && (
@@ -139,17 +159,18 @@ const Sigup = () => {
 
                         <div className="space-y-4">
                             <GoogleLogin
-                            onSuccess={async (credentialResponse) => {
-                                try {
-                                    const res = await api.post("/auth/google-auth", {
-                                        credential: credentialResponse.credential,
-                                    });
-                                    // console.log(res.data);
-                                    localStorage.setItem("token", res.data.token);
-                                    navigate("/");
-                                } catch (error) {
-                                    console.error(error.response?.data?.message || "Google login failed");
-                                }
+                                onSuccess={async (credentialResponse) => {
+                                    try {
+                                        const res = await api.post("/auth/google-auth", {
+                                            credential: credentialResponse.credential,
+                                        });
+                                        
+                                        localStorage.setItem("accessToken", res.data.token);
+                                        await fetchUser()
+                                        navigate("/");
+                                    } catch (error) {
+                                        console.error(error.response?.data?.message || "Google login failed");
+                                    }
                                 }}
                                 onError={() => {
                                     console.log('Login Failed');

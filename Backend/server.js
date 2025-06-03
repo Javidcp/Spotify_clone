@@ -6,9 +6,15 @@ const authRoutes = require("./routes/User/authRoutes")
 const cors = require("cors")
 const User = require("./models/User")
 const verifyToken = require("./middleware/verifyToken")
+const otpRoutes = require('./routes/User/OtpRoutes');
+
 
 const app = express()
 const route = express.Router()
+
+app.use(express.json())
+dotenv.config()
+app.use(cookieParser());
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -17,13 +23,16 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
 
-app.use(express.json())
-dotenv.config()
-app.use(cookieParser());
+
 
 connectDB()
 
 app.use("/api/auth", authRoutes)
+app.use('/api/otp', otpRoutes);
+
+
+
+
 
 route.get('/me', verifyToken, async (req, res) => {
     try {
@@ -31,6 +40,7 @@ route.get('/me', verifyToken, async (req, res) => {
         if (!user) {
         return res.status(404).json({ message: "User not found" });
         }
+        const { profileImage, name } = user
         res.json(user);
     } catch (err) {
         res.status(500).json({ message: "Server error" });

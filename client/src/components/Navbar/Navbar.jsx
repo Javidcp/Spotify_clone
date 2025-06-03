@@ -4,42 +4,120 @@ import { GoHomeFill } from "react-icons/go";
 import SearchBar from './SearchBar';
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import Profile from './Profile';
 
 
 
 const Navbar = () => {
 
+    const [isLogged, setLogged] = useState(false)
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+        setLogged(true);
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("accessToken");
+        window.location.reload();
+        navigate("/login")
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleDropdown = () => setIsOpen(!isOpen);
+
+
+
+
 
     return (
         <div className='h-16 pl-7 bg-black flex items-center justify-between'>
             <div className="flex items-center">
                 <img src={Logo} className='w-8 h-8' alt="" />
-                <div className='bg-[#1F1F1F] text-white p-[10px] ml-6 mr-2 hidden md:block rounded-full'>
+                <button onClick={() => navigate('/')} className='bg-[#1F1F1F] text-white p-[10px] ml-6 mr-2 hidden md:block rounded-full'>
                     <GoHomeFill size={28}  />
-                </div>
+                </button>
                 <SearchBar/>
             </div>
+                { !isLogged && (
             <div className="hidden md:flex text-zinc-400 " style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
-                <div className='px-3 mr-2 flex gap-2 border-r-1'>
+                    <>
+                    <div className={`px-3 mr-2 flex gap-2 border-r-1`}>
                     <span>Premium</span>
                     <span>Support</span>
                     <span>Download</span>
                 </div>
+                    </>
+                
                 <div>
                     <div className='flex items-center gap-2 mx-3'>
                         <MdOutlineDownloadForOffline size={20} />
                         Install App
                     </div>
                 </div>
-                <Link to='/signup'>Sign up</Link>
+                 
+                    <Link to='/signup'>Sign up</Link> 
             </div>
-            <div className='flex items-center gap-4'>
+                )}
+            { !isLogged ? (
+                <div className='flex items-center gap-4'>
                 <Link to='/signup' className='text-zinc-400 block md:hidden' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Sign up</Link>
-            <button onClick={() => navigate('/login')} className='h-10 w-20 md:h-12 md:w-28 mr-2 rounded-full bg-white flex items-center justify-center' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
-                Log in
-            </button>
+                <button onClick={() => navigate('/login')} className='h-10 w-20 md:h-12 md:w-28 mr-2 rounded-full bg-white flex items-center justify-center' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+                    Log in
+                </button>
             </div>
+            ) : (
+                <>
+                    <div className='flex items-center mr-1'>
+                        <div className='relative'>
+                            <button
+                                onClick={toggleDropdown}
+                                className="w-full flex items-center justify-between px-4 py-3 transition-all duration-200 transform hover:scale-105 "
+                            >
+                                <Profile/>
+                            </button>
+                            <div
+                                className={`absolute top-full w-[200px] right-0 mt-3 text-white bg-[#1f1f1f] rounded-lg shadow-xl overflow-hidden transition-all duration-200 transform origin-top ${
+                                isOpen
+                                    ? 'opacity-100 scale-100 translate-y-0'
+                                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                                }`}
+                            >
+                                <div className="py-2">
+                                    <button
+                                        onClick={() => navigate('/account')}
+                                        className="flex text-center w-[100%] px-4 py-3 hover:bg-[#444444]  transition-colors duration-150"
+                                    >
+                                        View Profile
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex text-center w-[100%] px-4 py-3 hover:bg-[#444444]  transition-colors duration-150"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </>
+            )}
         </div>
     )
 }

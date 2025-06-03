@@ -2,7 +2,7 @@ import React from 'react'
 
 const MainHome = () => {
     return (
-        <div className='bg-[#1F1F1F] text-white rounded-xl h-[100%]'>
+        <div className='bg-[#1a1a1a] text-white rounded-xl h-[100%]'>
             <MyComponent/>
         </div>
     )

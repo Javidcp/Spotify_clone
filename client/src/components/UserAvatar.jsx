@@ -1,8 +1,5 @@
-import React from 'react';
-
-const UserAvatar = ({ name, photo, size = '40' }) => {
+const UserAvatar = ({ name, photo, size = 40 }) => {
     const getInitial = (name) => name?.charAt(0).toUpperCase();
-
     const dimension = `${size}px`;
 
     return photo ? (
@@ -14,7 +11,7 @@ const UserAvatar = ({ name, photo, size = '40' }) => {
         />
     ) : (
         <div
-        className="rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold"
+        className="rounded-full bg-orange-600 text-black border-0 outline-6 outline-[#1f1f1f] flex items-center justify-center font-semibold"
         style={{
             width: dimension,
             height: dimension,
