@@ -2,13 +2,14 @@ import React from 'react'
 
 const MainHome = () => {
     return (
-        <div className='bg-[#1a1a1a] text-white rounded-xl h-[100%]'>
+        <div className='bg-[#1a1a1a] text-white  h-[100%] overflow-hidden'>
             <MyComponent/>
         </div>
     )
 }
 
 import { useSelector } from "react-redux";
+import Footer from './Footer';
 
 const MyComponent = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -17,7 +18,7 @@ const MyComponent = () => {
   console.log("Authenticated:", isAuthenticated);
 
   return (
-    <div>
+    <div className=' overflow-hidden'>
       {isAuthenticated ? `Hello, ${user.username}` : "Not logged in"}
     </div>
   );

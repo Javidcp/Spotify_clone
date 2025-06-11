@@ -2,8 +2,6 @@ import Logo from "../../assets/spotify_icon-white.png";
 import { GoogleLogin } from '@react-oauth/google';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/axios';
-import facebook from "../../assets/facebook-logo.png"
-import { FaApple } from "react-icons/fa";
 import { useState, useEffect } from "react";
 
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -29,10 +27,15 @@ const Sigup = () => {
     const [view, setView] = useState(() => {
         return Number(localStorage.getItem("view")) || 1;
     });
+    useEffect(() => {
+        localStorage.setItem("view", view);
+    }, [view]);
 
     const goBack = () => {
         navigate(setView(view - 1));
     };
+
+
 
 
     const handleNext = async (e) => {
@@ -41,54 +44,61 @@ const Sigup = () => {
 
         try {
             const res = await api.post("/auth/check-email", { email });
-            console.log("User registered:", res.data);
+            console.log("Email check:", res.data);
 
-            navigate(setView(view + 1)) 
+            setView(view + 1) 
         } catch (err) {
             setError(err.response?.data?.message || "Something went wrong");
         }
     };
-
-const handleRegister = async (e) => {
-    e.preventDefault();
-
-    try {
-        const dob = `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`;
-
-        const userData = {
-            username: name,
-            email,
-            password,
-            dateOfBirth: dob,
-            gender,
-        };
-
-        const res = await api.post("/auth/register", userData, {
-            withCredentials: true,
-        });
-
-        console.log("User registered:", res.data);
-
-        localStorage.setItem("accessToken", res.data.token);
-
-        dispatch(setUser(res.data.user));
-        dispatch(setAuth(true));
-
-        navigate("/");
-        setView(1);
-    } catch (error) {
-        console.error(error.response?.data?.message || "Registration failed");
-        alert(error.response?.data?.message || "Registration failed");
-    }
-};
+    const handlePasswordNext = (e) => {
+        e.preventDefault();
+        if (hasLetter && hasNumberOrSpecial && hasMinLength) {
+            setView(view + 1);
+        } else {
+            alert("Please meet all password requirements");
+        }
+    };
 
 
+    const handleRegister = async (e) => {
+        e.preventDefault();
+
+        try {
+            const dob = `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`;
+
+            const userData = {
+                username: name,
+                email,
+                password,
+                dateOfBirth: dob,
+                gender,
+            };
+
+            const res = await api.post("/auth/register", userData, {
+                withCredentials: true,
+            });
+
+            console.log("User registered:", res.data);
+
+            localStorage.setItem("accessToken", res.data.token);
+
+            dispatch(setUser(res.data.user));
+            dispatch(setAuth(true));
+
+            localStorage.removeItem("view")
+            navigate("/");
+        } catch (error) {
+            console.error(error.response?.data?.message || "Registration failed");
+            alert(error.response?.data?.message || "Registration failed");
+        }
+    };
 
 
 
-    useEffect(() => {
-        localStorage.setItem("view", view);
-    }, [view]);
+
+
+
 
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState('');
@@ -98,35 +108,22 @@ const handleRegister = async (e) => {
     
     const CustomCheckbox = ({ checked, label }) => (
         <div className="flex items-center mb-2 mt-3">
-        <div className="relative w-5 h-5 mr-2">
-            <input
-                type="checkbox"
-                checked={checked}
-                readOnly
-                className="opacity-0 absolute w-5 h-5 z-10 cursor-default"
-            />
-            <span className={`block w-4 h-4 rounded-full border-2 ${checked ? 'bg-green-500 border-green-500' : 'border-gray-400'}`}>
-            {checked && (
-                <IoIosCheckmark size={20} className="text-black font-light absolute top-[-1.5px] right-[2px]" />
-            )}
-            </span>
-        </div>
-        <label className="text-sm select-none">{label}</label>
+            <div className="relative w-5 h-5 mr-2">
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    readOnly
+                    className="opacity-0 absolute w-5 h-5 z-10 cursor-default"
+                />
+                <span className={`block w-4 h-4 rounded-full border-2 ${checked ? 'bg-green-500 border-green-500' : 'border-gray-400'}`}>
+                    {checked && (
+                        <IoIosCheckmark size={20} className="text-black font-light absolute top-[-1.5px] right-[2px]" />
+                    )}
+                </span>
+            </div>
+            <label className="text-sm select-none">{label}</label>
         </div>
     );
-
-
-    const fetchUser = async () => {
-        try {
-        const token = localStorage.getItem("accessToken");
-        const res = await api.get("/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data);
-        } catch (error) {
-        console.error("Failed to fetch user:", error);
-        }
-    };
 
 
 
@@ -166,7 +163,11 @@ const handleRegister = async (e) => {
                                         });
                                         
                                         localStorage.setItem("accessToken", res.data.token);
-                                        await fetchUser()
+
+                                        dispatch(setUser(res.data.user));
+                                        dispatch(setAuth(true));
+
+                                        localStorage.removeItem("view");
                                         navigate("/");
                                     } catch (error) {
                                         console.error(error.response?.data?.message || "Google login failed");
@@ -177,20 +178,10 @@ const handleRegister = async (e) => {
                                 }}
                                 type="standard"
                                 size="large"
-                                width="320"
+                                width="370"
                                 text="continue_with"
                                 shape="pill"
                             />
-                            <div className="p-3 border-1 border-[#818181] rounded-full items-center flex justify-around" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
-                                <img src={facebook} className="w-5 h-5" alt="" />
-                                <span>Continue with Facebook</span>
-                                <span></span>
-                            </div>
-                            <div className="p-3 border-1 border-[#818181] rounded-full items-center flex justify-around" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
-                                <FaApple className="w-5 h-5" />
-                                <span>Continue with apple</span>
-                                <span></span>
-                            </div>
                         </div>
 
                         <hr className="text-[#818181] my-8" />
@@ -229,7 +220,7 @@ const handleRegister = async (e) => {
                             </div>
                         </div>
                         <div className='flex flex-col justify-center items-center my-6'>
-                            <form onSubmit={handleNext}>
+                            <form onSubmit={handlePasswordNext}>
                                 <label className="text-[14px]" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Password</label><br />
                                 <div className='relative flex w-[300px] mb-2'>
                                     <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" />
@@ -285,7 +276,7 @@ const handleRegister = async (e) => {
 
                                 <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Date of birth</label>
                                 <div  className=" flex gap-2">
-                                    <input type="number" placeholder="yyyy" value={dobYear} onChange={(e) => setDobYear(e.target.value)} className="border-1 p-2 w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" />
+                                    <input type="text" inputMode="numeric" placeholder="yyyy" maxlength={4}  value={dobYear} onChange={(e) => setDobYear(e.target.value)} className="border-1 p-2 w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" />
                                     <select
                                         value={dobMonth}
                                         onChange={(e) => setDobMonth(e.target.value)}
@@ -306,7 +297,7 @@ const handleRegister = async (e) => {
                                         <option value="11">November</option>
                                         <option value="12">December</option>
                                     </select>
-                                    <input type="number" placeholder="dd" value={dobDay} onChange={(e) => setDobDay(e.target.value)} className="border-1 p-2 w-[60px] mt-1 rounded-sm border-[#818181]" />
+                                    <input type="text" inputMode="numeric" maxlength={2} placeholder="dd" value={dobDay} onChange={(e) => setDobDay(e.target.value)} className="border-1 p-2 w-[60px] mt-1 rounded-sm border-[#818181]" />
                                 </div>
 
                                 <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Gender</label>
