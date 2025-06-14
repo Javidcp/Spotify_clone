@@ -2,6 +2,7 @@ import Logo from "../../assets/spotify_icon-white.png";
 import { GoogleLogin } from '@react-oauth/google';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/axios';
+import { toast } from 'react-toastify';
 import { useState, useEffect } from "react";
 
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -45,7 +46,6 @@ const Sigup = () => {
         try {
             const res = await api.post("/auth/check-email", { email });
             console.log("Email check:", res.data);
-
             setView(view + 1) 
         } catch (err) {
             setError(err.response?.data?.message || "Something went wrong");
@@ -56,7 +56,7 @@ const Sigup = () => {
         if (hasLetter && hasNumberOrSpecial && hasMinLength) {
             setView(view + 1);
         } else {
-            alert("Please meet all password requirements");
+            toast.info("Please meet all password requirements");
         }
     };
 
@@ -90,7 +90,7 @@ const Sigup = () => {
             navigate("/");
         } catch (error) {
             console.error(error.response?.data?.message || "Registration failed");
-            alert(error.response?.data?.message || "Registration failed");
+            toast.error(error.response?.data?.message || "Registration failed");
         }
     };
 
@@ -161,12 +161,9 @@ const Sigup = () => {
                                         const res = await api.post("/auth/google-auth", {
                                             credential: credentialResponse.credential,
                                         });
-                                        
                                         localStorage.setItem("accessToken", res.data.token);
-
                                         dispatch(setUser(res.data.user));
                                         dispatch(setAuth(true));
-
                                         localStorage.removeItem("view");
                                         navigate("/");
                                     } catch (error) {

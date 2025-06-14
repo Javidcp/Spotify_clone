@@ -7,10 +7,14 @@ const cors = require("cors")
 const User = require("./models/User")
 const verifyToken = require("./middleware/verifyToken")
 const otpRoutes = require('./routes/User/OtpRoutes');
+const userRoutes = require("./routes/Admin/userRoute")
+const path = require("path")
 
 
 const app = express()
 const route = express.Router()
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(express.json())
 dotenv.config()
@@ -29,8 +33,7 @@ connectDB()
 
 app.use("/api/auth", authRoutes)
 app.use('/api/otp', otpRoutes);
-
-
+app.use('/api/auth', userRoutes)
 
 
 

@@ -23,7 +23,6 @@ const generateRefreshToken = (user) => {
 
 exports.checkEmailExists = errorHandling(async (req, res, next) => {
     const { email } = req.body;
-
     if (!email) {
         return res.status(400).json({ message: "Email is required" });
     }
@@ -49,19 +48,18 @@ exports.registerUser = errorHandling(async (req, res, next) => {
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashed, dateOfBirth, gender });
     await user.save();
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-
-    
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
+        sameSite: "Strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({
+    res.status(201).json({
         message: "User registered successfully",
         user: {
         _id: user._id,
@@ -100,12 +98,7 @@ exports.loginUser = errorHandling(async (req, res, next) => {
 
     res.json({
         message: "Login successful",
-        user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        },
+        user,
         token: accessToken,
     });
 });
@@ -124,6 +117,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
 
     let user = await User.findOne({ email });
 
+    if (user && !user.googleId) {
+        return res.status(400).json({
+            message: "Email already registered with a different method. Please login with email/password."
+        });
+    }
+
     if (!user) {
         user = await User.create({
             username: name,
@@ -131,16 +130,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
             profileImage: picture,
             googleId,
             likedSongs: [],
+            isPremium,
         });
     }
 
-    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "20m",
-    });
-
-    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: "7d",
-    });
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -156,12 +151,32 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
             username: user.username,
             email: user.email,
             role: user.role,
+            isPremium: user.isPremium,
             likedSongs: user.likedSongs,
         },
         token: accessToken,
     });
 });
 
+
+
+exports.updateProfile = errorHandling(async (req, res) => {
+    const userId = req.userId;
+    const { username } = req.body;
+    const updateData = {};
+    if (username) updateData.username = username;
+
+    if (req.file) {
+        updateData.profileImage = req.file.path;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ user: updatedUser });
+});
 
 
 
@@ -176,7 +191,6 @@ exports.refreshAccessToken = errorHandling(async (req, res, next) => {
         if (err) {
         return next(new Error("Invalid refresh token"));
         }
-
         const accessToken = generateAccessToken(user);
         res.json({ token: accessToken });
     });

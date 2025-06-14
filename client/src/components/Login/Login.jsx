@@ -48,11 +48,9 @@ const Login = () => {
 
         try {
             const res = await api.post('/otp/verify-otp', { email, otp });
-
             toast.success(res.data.message);
 
             localStorage.setItem("accessToken", res.data.token);
-
             dispatch(setUser(res.data.user));
             dispatch(setAuth(true));
 
@@ -74,6 +72,9 @@ const Login = () => {
         localStorage.setItem("accessToken", res.data.token);
         dispatch(setUser(res.data.user));
         dispatch(setAuth(true));
+        if (res.data.user.role === "admin") {
+            navigate('/admin/dashboard')
+        }
 
         localStorage.removeItem("view");
         navigate("/");

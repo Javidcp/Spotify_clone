@@ -3,13 +3,6 @@ import Logo from "../assets/spotify_icon-white.png"
 import Footer from './Footer';
 
 export default function Premium() {
-    const paymentMethods = [
-        { name: 'Bhim UPI', logo: 'BHIM UPI' },
-        { name: 'PhonePe', logo: 'PhonePay' },
-        { name: 'Google Pay', logo: 'G Pay' },
-        { name: 'Paytm', logo: 'Paytm' }
-    ];
-
     const scrollToSection = (id) => {
         const element = document.getElementById(id);
         if (element) {
@@ -133,21 +126,18 @@ export default function Premium() {
             </div>
 
             <div className="flex justify-center items-center gap-4 mb-4">
-            {paymentMethods.map((method, index) => (
-                <div key={index} className="bg-white rounded-lg p-3 w-16 h-12 flex items-center justify-center">
-                {method.name === 'PhonePe' ? (
-                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                ) : method.name === 'Google Pay' ? (
-                    <div className="text-blue-500 font-bold text-lg">G</div>
-                ) : (
-                    <div className="text-black text-xs font-medium text-center">
-                    {method.logo}
-                    </div>
-                )}
+                <div className="bg-white h-8 w-15 flex justify-center rounded-md py-0.5">
+                    <img src="https://paymentsdk.spotifycdn.com/svg/providers/upi/upi.svg" width={50} alt="" />
                 </div>
-            ))}
+                <div className="bg-white h-8 w-15 flex justify-center rounded-md py-0.5">
+                    <img src="https://paymentsdk.spotifycdn.com/svg/providers/upi/phonepe.svg" width={50} alt="" />
+                </div>
+                <div className="bg-white h-8 w-15 flex justify-center rounded-md py-0.5">
+                    <img src="https://paymentsdk.spotifycdn.com/svg/providers/upi/google-pay.svg" width={50} alt="" />
+                </div>
+                <div className="bg-white h-8 w-15 flex justify-center rounded-md py-0.5">
+                    <img src="https://paymentsdk.spotifycdn.com/svg/providers/upi/paytm.svg" width={50} alt="" />
+                </div>
             </div>
             <p className="text-sm opacity-60 mb-16">
             <span className="underline cursor-pointer">+ 6 more</span>

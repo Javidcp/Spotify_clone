@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: "" 
     }],
+    favourite: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "" 
+    }],
     googleId: { type: String, default: null },
     isPremium: { type: Boolean, default: false },
     role: { type: String, default: "user", enum: ["user", "admin"] }

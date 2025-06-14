@@ -10,6 +10,8 @@ const MainHome = () => {
 
 import { useSelector } from "react-redux";
 import Footer from './Footer';
+import SongCarousel from '../components/SongCarousal/IndiaBest';
+import SpotifyArtistCarousel from '../components/Artist/ArtistCarousel';
 
 const MyComponent = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -18,8 +20,9 @@ const MyComponent = () => {
   console.log("Authenticated:", isAuthenticated);
 
   return (
-    <div className=' overflow-hidden'>
-      {isAuthenticated ? `Hello, ${user.username}` : "Not logged in"}
+    <div>
+      <SongCarousel/>
+      <SpotifyArtistCarousel/>
     </div>
   );
 };

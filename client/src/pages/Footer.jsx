@@ -11,7 +11,7 @@ const Footer = () => {
             <footer className=" pt-10 pb-8 px-8">
             <div className="border-t border-zinc-800 mb-15"></div>
                 <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-5 gap-8 mb-16">
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-8 mb-16">
                     <div>
                     <h3 className="text-white font-semibold text-base mb-4">Company</h3>
                     <ul className="space-y-3">
@@ -96,7 +96,7 @@ const Footer = () => {
                     </ul>
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-center  w-full  ">
                     <div className="flex space-x-4">
                         <a 
                         href="https://www.instagram.com/spotify/" 
