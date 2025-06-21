@@ -1,9 +1,14 @@
 import React from 'react'
+import BottomPlayer from '../components/Player';
+import useAuth from '../hooks/useAuth';
 
 const MainHome = () => {
+  const { isAuthenticated } = useAuth()
+
     return (
         <div className='bg-[#1a1a1a] text-white  h-[100%] overflow-hidden'>
             <MyComponent/>
+            {isAuthenticated &&<BottomPlayer/>}
         </div>
     )
 }

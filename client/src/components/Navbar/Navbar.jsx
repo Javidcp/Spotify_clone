@@ -51,24 +51,26 @@ const Navbar = () => {
                 <button onClick={() => navigate('/')} className='bg-[#1F1F1F] text-white p-[10px] ml-6 mr-2 hidden md:block rounded-full'>
                     <GoHomeFill size={28}  />
                 </button>
-                <SearchBar/>
+                <span  className="hidden md:block w-[400px]">
+                    <SearchBar />
+                </span>
             </div>
                 { !isLogged && !user && (
-            <div className="hidden md:flex text-zinc-400 " style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
-                    <>
-                    <div className={`px-3 mr-2 flex gap-2 border-r-1`}>
-                        <Link to='/premium'>Premium</Link>
-                        <Link to='https://www.spotify.com/in-en/download/windows/' target='_blank'>Download</Link>
+                    <div className="hidden md:flex text-zinc-400 " style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+                        <>
+                            <div className={`px-3 mr-2 flex gap-2 border-r-1`}>
+                                <Link to='/premium'>Premium</Link>
+                                <Link to='https://www.spotify.com/in-en/download/windows/' target='_blank'>Download</Link>
+                            </div>
+                        </>
+                        <div>
+                            <Link to='/download' className='flex items-center gap-2 mx-3'>
+                                <MdOutlineDownloadForOffline size={20} />
+                                Install App
+                            </Link>
+                        </div>
+                            <Link to='/signup'>Sign up</Link> 
                     </div>
-                    </>
-                    <div>
-                    <Link to='/download' className='flex items-center gap-2 mx-3'>
-                        <MdOutlineDownloadForOffline size={20} />
-                        Install App
-                    </Link>
-                </div>
-                    <Link to='/signup'>Sign up</Link> 
-            </div>
                 )}
             { !isLogged && !user ? (
                 <div className='flex items-center gap-4'>

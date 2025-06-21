@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Play, Heart, MoreHorizontal, CheckCircle } from 'lucide-react';
 import VerifyTick from "../../assets/tick.png"
+import Dropdown from '../Dot';
 
 export default function ArtistPage() {
     const [isFollowing, setIsFollowing] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const popularSongs = [
         {
@@ -59,31 +61,31 @@ export default function ArtistPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-        {/* Hero Section */}
+        {/* Hero section */}
         <div className="relative h-80">
             <div className="absolute inset-0 bg-red-400"></div>
             <div className="absolute inset-0 flex items-end p-8">
             <div className="flex items-center space-x-6">
                 <div className="w-48 h-48 bg-gray-950 rounded-full overflow-hidden shadow-2xl">
-                <img 
-                    src="" 
-                    alt="Dhanush" 
-                    className="w-full h-full object-cover"
-                />
+                    <img 
+                        src="" 
+                        alt="D" 
+                        className="w-full h-full object-cover"
+                    />
                 </div>
                 <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                    <img src={VerifyTick} className='w-6 h-6' alt="" />
-                    <span className="text-sm text-gray-300">Verified Artist</span>
-                </div>
-                <h1 className="text-6xl font-bold">Dhanush</h1>
-                <p className="text-gray-300 text-lg">9,765,817 monthly listeners</p>
+                    <div className="flex items-center space-x-2">
+                        <img src={VerifyTick} className='w-6 h-6' alt="" />
+                        <span className="text-sm text-gray-300">Verified Artist</span>
+                    </div>
+                    <h1 className="text-6xl font-bold">Dhanush</h1>
+                    <p className="text-gray-300 text-lg">9,765,817 monthly listeners</p>
                 </div>
             </div>
             </div>
         </div>
 
-        {/* Control Section */}
+        {/* Control section */}
         <div className="px-8 py-6 bg-gradient-to-b from-black/60 to-black">
             <div className="flex items-center space-x-4">
             <button 
@@ -121,7 +123,7 @@ export default function ArtistPage() {
             </div>
         </div>
 
-        {/* Popular Songs Section */}
+        {/* Popular song section */}
         <div className="px-8 py-6">
             <h2 className="text-2xl font-bold mb-6">Popular</h2>
             <div className="space-y-2">
@@ -162,20 +164,33 @@ export default function ArtistPage() {
                     {song.duration}
                 </div>
                 
-                <button className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setDropdownOpen(dropdownOpen === song.id ? null : song.id)}  className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                     <MoreHorizontal className="w-full h-full" />
                 </button>
+                {dropdownOpen === song.id && (
+                    <div className="relative z-50">
+                        <Dropdown
+                            isOpen={true}
+                            setIsOpen={() => setDropdownOpen(null)}
+                            position="right"
+                            onItemClick={(item) => {
+                                console.log('Clicked:', item.label);
+                                setDropdownOpen(null);
+                            }}
+                        />
+                    </div>
+                )}
                 </div>
                 </div>
             ))}
             </div>
         </div>
 
-        {/* Show More Button */}
         <div className="px-8 pb-8">
             <button className="text-gray-400 hover:text-white transition-colors font-medium">
             Show all
             </button>
+
         </div>
         </div>
     );

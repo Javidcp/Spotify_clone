@@ -14,7 +14,7 @@ const AdminPanel = () => {
         <div>
             <SideBar  isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <TopBar toggleSidebar={toggleSidebar} />
-            <div className={` ${isSidebarOpen === true ? "ml-60" : 'ml-0'} p-6 flex-1`}>
+            <div className={` ${isSidebarOpen === true ? "ml-50" : 'ml-0'} p-6 flex-1`}>
                 <Outlet />
             </div>
         </div>

@@ -14,13 +14,25 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     return {
-      folder: 'products',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation: [{ width: 800, height: 800, crop: 'limit' }],
+      folder: 'uploads',
+      resource_type: 'auto',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp3', 'wav', 'aac', 'm4a', 'mp4', 'mov', 'avi'],
+      transformation: [
+        { quality: "auto" },
+        { fetch_format: "auto" }
+      ]
     };
   },
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    'image/jpeg', 'image/png', 'image/webp',
+    'audio/mpeg', 'audio/wav', 'audio/aac',
+    'video/mp4', 'video/quicktime'
+  ];
+  allowedTypes.includes(file.mimetype) ? cb(null, true) : cb(new Error("Invalid file type"), false);
+};
 
+const upload = multer({ storage, fileFilter });
 module.exports = upload;

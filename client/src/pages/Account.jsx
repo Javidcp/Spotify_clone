@@ -18,11 +18,9 @@ const Account = () => {
 
 
 
-
     useEffect(() => {
         if (user) {
             setName(user.username || '');
-
             if (user.profileImage) {
                 const baseUrl = 'http://localhost:5050/';
                 const imgUrl = user.profileImage.startsWith('http')
@@ -34,7 +32,6 @@ const Account = () => {
             }
         }
     }, [user]);
-
 
 
     const openModal = () => setIsOpen(true);
@@ -71,11 +68,11 @@ const Account = () => {
             const updatedUser = res.data.user;
 
             if (updatedUser.profileImage) {
-            const baseUrl = 'http://localhost:5050/';
-            updatedUser.profileImage = updatedUser.profileImage.startsWith('http')
-                ? updatedUser.profileImage
-                : `${baseUrl}${updatedUser.profileImage}`;
-            updatedUser.profileImage += `?t=${new Date().getTime()}`;
+                const baseUrl = 'http://localhost:5050/';
+                updatedUser.profileImage = updatedUser.profileImage.startsWith('http')
+                    ? updatedUser.profileImage
+                    : `${baseUrl}${updatedUser.profileImage}`;
+                updatedUser.profileImage += `?t=${new Date().getTime()}`;
             }
 
             setName(updatedUser.username);

@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, Plus, MoreHorizontal, Menu, LayoutList, List, Clock } from 'lucide-react';
-import { usePlayer } from '../../hooks/redux';
-import BottomPlayer from '../Player';
-import VideoPlayer from './VideoPlayer';
-import Dropdown from "../Dot"
+import { Play, Pause, Plus, Download, Menu,Heart, LayoutList, List, Clock } from 'lucide-react';
+import { usePlayer } from '../hooks/redux';
+import BottomPlayer from './Player';
+import VideoPlayer from './SongCarousal/VideoPlayer';
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay }) => (
     <div
@@ -50,11 +49,8 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
             <span className="text-gray-400 text-sm">{song.dateAdded}</span>
         </div>
 
-        <div className="col-span-1 flex items-center gap-2 justify-end">
+        <div className="col-span-1 flex items-center justify-end">
             <span className="text-gray-400 text-sm">{song.duration}</span>
-            <button  className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100     transition-opacity">
-                <MoreHorizontal className="w-full h-full" />
-            </button>
         </div>
     </div>
 ));
@@ -99,11 +95,8 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
             <span className="text-gray-400 text-sm">{song.dateAdded}</span>
         </div>
 
-        <div className="col-span-1 flex items-center gap-2 justify-end">
+        <div className="col-span-1 flex items-center justify-center">
             <span className="text-gray-400 text-sm">{song.duration}</span>
-            <button  className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100     transition-opacity">
-                <MoreHorizontal className="w-full h-full" />
-            </button>
         </div>
     </div>
 ));
@@ -111,13 +104,12 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
 SongRowList.displayName = 'SongRowList';
 SongRowCompact.displayName = 'SongRowCompact';
 
-const Inside = () => {
+const LikedSong = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [viewMode, setViewMode] = useState('List');
     const [isScrolled, setIsScrolled] = useState(false);
     const scrollRef = useRef(null);
     const navigate = useNavigate();
-    const [dropdownOpen, setDropdownOpen] = useState(false)
 
     const {
         currentTrackId,
@@ -133,15 +125,6 @@ const Inside = () => {
         videoRef
     } = usePlayer();
 
-    const playlists = useMemo(() => [
-        {
-            id: 1,
-            title: "BOLLYWOOD CENTRAL",
-            subtitle: "Bollywood Central, jab baje toh seedha dil ke",
-            image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=300&fit=crop",
-            color: "bg-gradient-to-br from-pink-500 to-red-500"
-        }
-    ], []);
 
     const handleScroll = useCallback(() => {
         const scrollContainer = scrollRef.current;
@@ -207,11 +190,9 @@ const Inside = () => {
                 {MainPlayButton}
                 {!isScrolled && (
                     <>
-                        <button className="border-2 border-zinc-500 text-zinc-500 hover:border-white hover:text-white rounded-full p-2 transition-colors">
-                            <Plus className="w-5 h-5" />
-                        </button>
+                        
                         <button className="text-gray-400 hover:text-white transition-colors">
-                            <MoreHorizontal className="w-6 h-6" />
+                            <Download className="w-6 h-6" />
                         </button>
                     </>
                 )}
@@ -261,13 +242,13 @@ const Inside = () => {
                         <div className="col-span-5">Title</div>
                         <div className="col-span-4 hidden sm:block">Album</div>
                         <div className="col-span-1 hidden md:block">Date added</div>
-                        <div className="col-span-1 flex justify-center">
+                        <div className="col-span-1 flex justify-end">
                             <Clock className="w-4 h-4" />
                         </div>
                     </div>
 
                     <div className="px-6">
-                        {songs.map((song, index) => (
+                        {/* {songs.map((song, index) => (
                             <SongRowList
                                 key={song.id}
                                 song={song}
@@ -275,10 +256,8 @@ const Inside = () => {
                                 currentTrackId={currentTrackId}
                                 isPlaying={isPlaying}
                                 onPlay={handlePlay}
-                                setDropdownOpen={setDropdownOpen}
-                                dropdownOpen={dropdownOpen}
                             />
-                        ))}
+                        ))} */}
                     </div>
                 </>
             );
@@ -296,7 +275,7 @@ const Inside = () => {
                         </div>
                     </div>
 
-                    {songs.map((song, index) => (
+                    {/* {songs.map((song, index) => (
                         <SongRowCompact
                             key={song.id}
                             song={song}
@@ -305,7 +284,7 @@ const Inside = () => {
                             isPlaying={isPlaying}
                             onPlay={handlePlay}
                         />
-                    ))}
+                    ))} */}
                 </div>
             );
         }
@@ -313,29 +292,25 @@ const Inside = () => {
 
     return (
         <div className="flex bg-[#121212] text-white min-h-screen">
-            {/* Playlist */}
             <div className="flex-1 rounded-lg" ref={scrollRef}>
-                {playlists.map(item => (
-                    <div key={item.id} className="p-7 relative" style={{
-                        backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${item.image})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}>
-                        <h4 className="text-sm opacity-80">Public Playlist</h4>
-                        <h1 className="text-3xl md:text-8xl font-bold mb-3">{item.title}</h1>
-                        <p className="text-gray-300 mb-2">{item.subtitle}</p>
-                        <div className="flex mt-1 gap-1 items-center text-sm">
-                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <span className="text-black font-bold text-xs">S</span>
+                
+                    <div className="bg-gradient-to-b from-purple-950 via-purple-900 to-purple-950 font-inter text-gray-100 p-4 sm:p-6 md:p-8">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 mb-8 ">
+                            <div className="relative w-48 h-48 sm:w-56 sm:h-56 bg-gradient-to-br from-indigo-700 to-purple-700 rounded-lg flex items-center justify-center shadow-2xl">
+                            <Heart className="w-24 h-24 text-white" fill="white" />
                             </div>
-                            <p className="font-bold">Spotify</p>
-                            <span className="w-1 rounded-full bg-gray-300 h-1"></span>
-                            <div className="font-semibold text-gray-300">1,523,558 saves</div>
-                            <span className="w-1 rounded-full bg-gray-300 h-1"></span>
-                            <div className="font-semibold text-gray-300">50 songs, about 3 hr</div>
+
+                            <div className="flex flex-col text-center sm:text-left">
+                            <span className="text-sm font-semibold text-gray-300">Playlist</span>
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mt-2 mb-4">
+                                Liked Songs
+                            </h1>
+                            <p className="text-sm text-gray-200">
+                                Javid - <span className="font-semibold">1 song</span>
+                            </p>
+                            </div>
                         </div>
                     </div>
-                ))}
 
                 <div className="bg-[#121212]">
                     {HeaderSection}
@@ -369,4 +344,4 @@ const Inside = () => {
     );
 };
 
-export default Inside;
+export default LikedSong;

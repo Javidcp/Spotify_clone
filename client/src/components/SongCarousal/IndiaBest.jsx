@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { usePlayer } from '../../hooks/redux';
+import useAuth from '../../hooks/useAuth';
 
 const SongCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const { playTrack } = usePlayer()
 
   const playlists = [
     {
@@ -86,22 +92,33 @@ const SongCarousel = () => {
     }
   ];
 
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === playlists.length - 5 ? 0 : prevIndex + 1
-    );
-  };
+      const scroll = (direction) => {
+        const container = scrollRef.current;
+        if (!container) return;
 
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? playlists.length - 5 : prevIndex - 1
-    );
-  };
+        const scrollAmount = 320;
+        const newScrollLeft = direction === 'left' 
+        ? container.scrollLeft - scrollAmount 
+        : container.scrollLeft + scrollAmount;
+
+        container.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+        });
+    };
+
+    const handleScroll = () => {
+        const container = scrollRef.current;
+        if (!container) return;
+
+        setShowLeftArrow(container.scrollLeft > 0);
+        setShowRightArrow(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+        );
+    };
 
   return (
     <div className="bg-[#121212] text-white pb-15 p-8">
-      
-
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">India's Best</h2>
@@ -111,32 +128,32 @@ const SongCarousel = () => {
         </div>
 
         <div className="relative group">
-          <button 
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity -ml-4"
-          >
-            <ChevronLeft size={24} className="text-white" />
-          </button>
-          
-          <button 
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity -mr-4"
-          >
-            <ChevronRight size={24} className="text-white" />
-          </button>
+            {showLeftArrow && (
+              <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100">
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            {showRightArrow && (
+              <button onClick={() => scroll('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100" >
+                <ChevronRight size={24} />
+              </button>
+            )}
 
           <div className="overflow-hidden">
             <div 
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 20}%)` }}
+              ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 "
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {playlists.map((playlist) => (
                 <Link 
                   key={playlist.id}
                   to='/playlist'
-                  className="w-1/5 flex-shrink-0 px-2"
+                  className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 flex-shrink-0 px-2"
                 >
-                  <div className="bg-gray-900 p-4 rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer group/card">
+                  <div className="p-4 rounded-lg hover:bg-[#1d1d1d] transition-all duration-300 cursor-pointer group/card">
                     <div className="relative mb-4 overflow-hidden rounded-lg">
                       <div className={`aspect-square ${playlist.color} relative`}>
                         <div className="absolute top-3 left-3 w-6 h-6 bg-black bg-opacity-40 rounded-full flex items-center justify-center">
@@ -151,11 +168,11 @@ const SongCarousel = () => {
                           </h3>
                         </div>
 
-                        <div className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0 shadow-lg">
-                          <svg viewBox="0 0 24 24" className="w-5 h-5 relative text-black fill-current ml-1">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </div>
+                      <button onClick={(e) => {e.preventDefault(); {isAuthenticated && playTrack(playlist.id)}}} className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0 shadow-lg">
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 relative text-black fill-current ml-1">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </button>
                       </div>
                     </div>
 

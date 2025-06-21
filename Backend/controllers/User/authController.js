@@ -80,6 +80,12 @@ exports.loginUser = errorHandling(async (req, res, next) => {
     if (!user) {
         return next(new Error("User not registered"));
     }
+    
+    if (user && user.isActive === false) {
+        return res.status(403).json({
+            message: "Your account has been blocked. Please contact support."
+        });
+    }
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
@@ -123,6 +129,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
         });
     }
 
+    if (user && user.isActive === false) {
+        return res.status(403).json({
+            message: "Your account has been blocked. Please contact support."
+        });
+    }
+
     if (!user) {
         user = await User.create({
             username: name,
@@ -130,7 +142,8 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
             profileImage: picture,
             googleId,
             likedSongs: [],
-            isPremium,
+            isPremium: false,
+            isActive: true,
         });
     }
 
@@ -152,6 +165,7 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
             email: user.email,
             role: user.role,
             isPremium: user.isPremium,
+            isActive: user.isActive,
             likedSongs: user.likedSongs,
         },
         token: accessToken,
@@ -187,13 +201,10 @@ exports.refreshAccessToken = errorHandling(async (req, res, next) => {
         return next(new Error("No refresh token provided"));
     }
 
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) {
-        return next(new Error("Invalid refresh token"));
-        }
-        const accessToken = generateAccessToken(user);
-        res.json({ token: accessToken });
-    });
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const user = await User.findById(decoded.id);
+    const accessToken = generateAccessToken(user);
+    res.json({ token: accessToken });
 });
 
 

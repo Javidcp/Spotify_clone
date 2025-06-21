@@ -8,6 +8,8 @@ const User = require("./models/User")
 const verifyToken = require("./middleware/verifyToken")
 const otpRoutes = require('./routes/User/OtpRoutes');
 const userRoutes = require("./routes/Admin/userRoute")
+const songRoutes = require("./routes/Admin/songRoutes")
+const artistRoutes = require("./routes/Admin/artistRoute")
 const path = require("path")
 
 
@@ -32,8 +34,11 @@ app.use(cors({
 connectDB()
 
 app.use("/api/auth", authRoutes)
-app.use('/api/otp', otpRoutes);
+app.use('/api/otp', otpRoutes)
+
 app.use('/api/auth', userRoutes)
+app.use('/api/songs', songRoutes)
+app.use('/api/artist', artistRoutes)
 
 
 

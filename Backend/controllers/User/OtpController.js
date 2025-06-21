@@ -3,13 +3,13 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const User = require("../../models/User")
 const jwt = require('jsonwebtoken');
+const errorHandling = require("../../helper/errorMiddleware")
 
-exports.sendOTP = async (req, res) => {
+exports.sendOTP = errorHandling(async (req, res) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedOtp = await bcrypt.hash(otp, 10);
 
-    try {
         await Otp.deleteMany({ email });
         await Otp.create({ email, otp: hashedOtp });
 
@@ -40,26 +40,21 @@ exports.sendOTP = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        res.status(200).json({ message: 'OTP sent to email' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error sending OTP', error });
-    }
-};
+        res.status(200).json({ message: 'OTP sent to email', otp });
+});
 
-exports.verifyOTP = async (req, res) => {
+exports.verifyOTP = errorHandling(async (req, res, next) => {
     const { email, otp } = req.body;
 
-    try {
         const record = await Otp.findOne({ email });
-        if (!record) return res.status(400).json({ message: 'OTP expired or not found' });
+        if (!record) return next(new Error("OTP expired or not found"))
 
         const isValid = await bcrypt.compare(otp, record.otp);
-        if (!isValid) return res.status(400).json({ message: 'Invalid OTP' });
+        if (!isValid) return next(new Error("Invalid OTP"))
 
         let user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+        if (!user) return next(new Error("User not found"))
+        if (user && user.isActive === false) return next(new Error("Your account has been blocked. Please contact support"))
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "7d"
@@ -67,8 +62,4 @@ exports.verifyOTP = async (req, res) => {
 
         await Otp.deleteMany({ email });
         res.status(200).json({ message: 'OTP verified successfully',token, user });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Error verifying OTP', error });
-    }
-};
+});

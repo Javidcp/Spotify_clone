@@ -4,55 +4,72 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/axios';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from "react";
+import { useForm } from 'react-hook-form';
 
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { IoIosArrowBack, IoIosCheckmark  } from "react-icons/io";
+import { IoIosArrowBack, IoIosCheckmark } from "react-icons/io";
 
 import { useDispatch } from "react-redux"
 import { setUser, setAuth } from "../../redux/authSlice";
 
-
-
-const Sigup = () => {
+const Signup = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    
+    const emailForm = useForm({
+        defaultValues: {
+            email: ''
+        }
+    });
+    
+    const passwordForm = useForm({
+        defaultValues: {
+            password: ''
+        }
+    });
+    
+    const profileForm = useForm({
+        defaultValues: {
+            name: '',
+            dobYear: '',
+            dobMonth: '',
+            dobDay: '',
+            gender: ''
+        }
+    });
 
-    const navigate = useNavigate()
-    const [email, setEmail] = useState('');
-    const [name, setName] = useState("");
-    const [dobYear, setDobYear] = useState("");
-    const [dobMonth, setDobMonth] = useState("");
-    const [dobDay, setDobDay] = useState("");
-    const [gender, setGender] = useState("");
-    const [error, setError] = useState('');
-
+    const [showPassword, setShowPassword] = useState(false);
     const [view, setView] = useState(() => {
         return Number(localStorage.getItem("view")) || 1;
     });
+
     useEffect(() => {
         localStorage.setItem("view", view);
     }, [view]);
 
     const goBack = () => {
-        navigate(setView(view - 1));
+        setView(view - 1);
     };
 
+    const password = passwordForm.watch('password');
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumberOrSpecial = /[\d!@#$%^&*()_+{}[\]:;<>,.?~\\/-]/.test(password);
+    const hasMinLength = password.length >= 10;
 
-
-
-    const handleNext = async (e) => {
-        e.preventDefault();
-        setError("");
-
+    const handleEmailSubmit = async (data) => {
         try {
-            const res = await api.post("/auth/check-email", { email });
+            const res = await api.post("/auth/check-email", { email: data.email });
             console.log("Email check:", res.data);
-            setView(view + 1) 
+            setView(view + 1);
         } catch (err) {
-            setError(err.response?.data?.message || "Something went wrong");
+            emailForm.setError('email', {
+                type: 'manual',
+                message: err.response?.data?.message || "Something went wrong"
+            });
         }
     };
-    const handlePasswordNext = (e) => {
-        e.preventDefault();
+
+    const handlePasswordSubmit = () => {
         if (hasLetter && hasNumberOrSpecial && hasMinLength) {
             setView(view + 1);
         } else {
@@ -60,19 +77,16 @@ const Sigup = () => {
         }
     };
 
-
-    const handleRegister = async (e) => {
-        e.preventDefault();
-
+    const handleRegistration = async (data) => {
         try {
-            const dob = `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`;
-
+            const dob = `${data.dobYear}-${data.dobMonth.padStart(2, '0')}-${data.dobDay.padStart(2, '0')}`;
+            
             const userData = {
-                username: name,
-                email,
-                password,
+                username: data.name,
+                email: emailForm.getValues('email'),
+                password: passwordForm.getValues('password'),
                 dateOfBirth: dob,
-                gender,
+                gender: data.gender,
             };
 
             const res = await api.post("/auth/register", userData, {
@@ -82,11 +96,9 @@ const Sigup = () => {
             console.log("User registered:", res.data);
 
             localStorage.setItem("accessToken", res.data.token);
-
             dispatch(setUser(res.data.user));
             dispatch(setAuth(true));
-
-            localStorage.removeItem("view")
+            localStorage.removeItem("view");
             navigate("/");
         } catch (error) {
             console.error(error.response?.data?.message || "Registration failed");
@@ -94,18 +106,6 @@ const Sigup = () => {
         }
     };
 
-
-
-
-
-
-
-    const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState('');
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumberOrSpecial = /[\d!@#$%^&*()_+{}[\]:;<>,.?~\\/-]/.test(password);
-    const hasMinLength = password.length >= 10;
-    
     const CustomCheckbox = ({ checked, label }) => (
         <div className="flex items-center mb-2 mt-3">
             <div className="relative w-5 h-5 mr-2">
@@ -125,11 +125,9 @@ const Sigup = () => {
         </div>
     );
 
-
-
     return (
         <>
-            { view === 1 && (
+            {view === 1 && (
                 <div className="bg-[#121212] min-h-screen flex justify-center text-white">
                     <div className='my-8 '>
                         <div className="flex justify-center">
@@ -139,10 +137,24 @@ const Sigup = () => {
                             Sign up to <br />start listening
                         </h2>
                         
-                        <form onSubmit={handleNext} className="mt-10">
+                        <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="mt-10">
                             <label className="text-xs" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Email address</label><br />
-                            <input type="text" placeholder="name@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" />
-                            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+                            <input 
+                                type="email" 
+                                placeholder="name@domain.com" 
+                                {...emailForm.register('email', {
+                                    required: 'Email is required',
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: 'Invalid email address'
+                                    }
+                                })}
+                                className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" 
+                            />
+                            {emailForm.formState.errors.email && (
+                                <p className="text-red-500 text-xs mt-1">{emailForm.formState.errors.email.message}</p>
+                            )}
+                            
                             <button type="submit" className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 800 }}>
                                 Next
                             </button>
@@ -195,8 +207,8 @@ const Sigup = () => {
                 </div>
             )}
 
-            { view === 2 && (
-                <div className='bg-[#121212] min-h-screen pt-8 flex flex-col justify-center items-center text-white'  style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+            {view === 2 && (
+                <div className='bg-[#121212] min-h-screen pt-8 flex flex-col justify-center items-center text-white' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
                     <div>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10 " />
@@ -208,21 +220,32 @@ const Sigup = () => {
                             </div>
                         </div>
                         <div className='flex w-[400px] items-center gap-1.5'>
-                            <button onClick={goBack}>
+                            <button type="button" onClick={goBack}>
                                 <IoIosArrowBack size={33} className='text-zinc-400' />
                             </button>
                             <div>
-                                <div className="text-zinc-400"  style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 1 of 2</div>
+                                <div className="text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 1 of 2</div>
                                 <div className="g">Create a password</div>
                             </div>
                         </div>
                         <div className='flex flex-col justify-center items-center my-6'>
-                            <form onSubmit={handlePasswordNext}>
+                            <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
                                 <label className="text-[14px]" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Password</label><br />
                                 <div className='relative flex w-[300px] mb-2'>
-                                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" />
+                                    <input 
+                                        type={showPassword ? 'text' : 'password'} 
+                                        {...passwordForm.register('password', {
+                                            required: 'Password is required',
+                                            validate: {
+                                                hasLetter: () => hasLetter || 'Password must contain at least 1 letter',
+                                                hasNumberOrSpecial: () => hasNumberOrSpecial || 'Password must contain at least 1 number or special character',
+                                                hasMinLength: () => hasMinLength || 'Password must be at least 10 characters long'
+                                            }
+                                        })}
+                                        className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" 
+                                    />
                                     <div className="absolute right-2 top-[40%]" onClick={() => setShowPassword((prev) => !prev)}>
-                                        {showPassword ?  <FaEye size={20} /> : <FaEyeSlash size={20} />}
+                                        {showPassword ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
                                     </div>
                                 </div>
                                 <label htmlFor="" className='text-sm '>Your password must contain at least</label><br />
@@ -234,18 +257,18 @@ const Sigup = () => {
                                 <button type="submit" className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 800 }}>
                                     Next
                                 </button>
-                        </form>
+                            </form>
                             <div className="text-[13px] text-[#818181] text-center mt-7" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
                                 This site is protected by reCAPTCHA and the Google <br />
                                 <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
-                        </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            { view === 3 && (
-                <div className='bg-[#121212] min-h-screen pt-8 flex flex-col justify-center items-center text-white' >
+            {view === 3 && (
+                <div className='bg-[#121212] min-h-screen pt-8 flex flex-col justify-center items-center text-white'>
                     <div>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10 " />
@@ -257,26 +280,60 @@ const Sigup = () => {
                             </div>
                         </div>
                         <div className='flex w-[400px] items-center gap-1.5' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
-                            <button onClick={goBack}>
+                            <button type="button" onClick={goBack}>
                                 <IoIosArrowBack size={33} className='text-zinc-400' />
                             </button>
                             <div>
-                                <div className="text-zinc-400"  style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 2 of 2</div>
+                                <div className="text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 2 of 2</div>
                                 <div className="g">Tell us about yourself</div>
                             </div>
                         </div>
                         <div className="flex flex-col justify-center items-center my-6">
-                            <form action="" onSubmit={handleRegister}>
+                            <form onSubmit={profileForm.handleSubmit(handleRegistration)}>
                                 <label className="text-[14px] block" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Name</label>
                                 <span className="text-[13px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>This name will appear on your profile</span>
-                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="border-1 p-2 w-[320px] mt-2 rounded-sm border-[#818181]" />
+                                <input 
+                                    type="text" 
+                                    {...profileForm.register('name', {
+                                        required: 'Name is required',
+                                        minLength: {
+                                            value: 2,
+                                            message: 'Name must be at least 2 characters long'
+                                        }
+                                    })}
+                                    className="border-1 p-2 w-[320px] mt-2 rounded-sm border-[#818181]" 
+                                />
+                                {profileForm.formState.errors.name && (
+                                    <p className="text-red-500 text-xs mt-1">{profileForm.formState.errors.name.message}</p>
+                                )}
 
                                 <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Date of birth</label>
-                                <div  className=" flex gap-2">
-                                    <input type="text" inputMode="numeric" placeholder="yyyy" maxlength={4}  value={dobYear} onChange={(e) => setDobYear(e.target.value)} className="border-1 p-2 w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" />
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        inputMode="numeric" 
+                                        placeholder="yyyy" 
+                                        maxLength={4}
+                                        {...profileForm.register('dobYear', {
+                                            required: 'Year is required',
+                                            pattern: {
+                                                value: /^\d{4}$/,
+                                                message: 'Please enter a valid year'
+                                            },
+                                            validate: {
+                                                validYear: (value) => {
+                                                    const year = parseInt(value);
+                                                    const currentYear = new Date().getFullYear();
+                                                    return (year >= 1900 && year <= currentYear) || 'Please enter a valid year';
+                                                }
+                                            }
+                                        })}
+                                        className="border-1 p-2 w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" 
+                                    />
                                     <select
-                                        value={dobMonth}
-                                        onChange={(e) => setDobMonth(e.target.value)}
+                                        {...profileForm.register('dobMonth', {
+                                            required: 'Month is required'
+                                        })}
                                         className="border p-2 w-[155px] mt-1 rounded-sm border-[#818181] text-white bg-[#121212]"
                                         defaultValue=""
                                     >
@@ -294,87 +351,103 @@ const Sigup = () => {
                                         <option value="11">November</option>
                                         <option value="12">December</option>
                                     </select>
-                                    <input type="text" inputMode="numeric" maxlength={2} placeholder="dd" value={dobDay} onChange={(e) => setDobDay(e.target.value)} className="border-1 p-2 w-[60px] mt-1 rounded-sm border-[#818181]" />
+                                    <input 
+                                        type="text" 
+                                        inputMode="numeric" 
+                                        maxLength={2} 
+                                        placeholder="dd"
+                                        {...profileForm.register('dobDay', {
+                                            required: 'Day is required',
+                                            pattern: {
+                                                value: /^(0?[1-9]|[12][0-9]|3[01])$/,
+                                                message: 'Please enter a valid day'
+                                            }
+                                        })}
+                                        className="border-1 p-2 w-[60px] mt-1 rounded-sm border-[#818181]" 
+                                    />
                                 </div>
+                                {(profileForm.formState.errors.dobYear || profileForm.formState.errors.dobMonth || profileForm.formState.errors.dobDay) && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {
+                                            profileForm.formState.errors.dobYear?.message || 
+                                            profileForm.formState.errors.dobMonth?.message || 
+                                            profileForm.formState.errors.dobDay?.message
+                                        }
+                                    </p>
+                                )}
 
                                 <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Gender</label>
                                 <span className="text-[14px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
                                     We use your gender to help personalize our <br />
                                     content recommendations and ads for you.
                                 </span>
-                                <div className="mt-2 flex items-center gap-4 text-sm" >
+                                <div className="mt-2 flex items-center gap-4 text-sm">
                                     <div className="grid grid-cols-1 gap-2">
-
                                         <div className="flex gap-7">
                                             <label className="flex items-center w-fit cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="gender"
-                                                value="Man"
-                                                checked={gender === "Man"}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="peer hidden"
-                                            />
-                                            <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
-                                            <span className="ml-2 text-white">Man</span>
-                                        </label>
+                                                <input
+                                                    type="radio"
+                                                    value="Man"
+                                                    {...profileForm.register('gender', {
+                                                        required: 'Please select a gender'
+                                                    })}
+                                                    className="peer hidden"
+                                                />
+                                                <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
+                                                <span className="ml-2 text-white">Man</span>
+                                            </label>
 
-                                        <label className="flex items-center w-fit cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="gender"
-                                                value="Woman"
-                                                checked={gender === "Woman"}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="peer hidden"
-                                            />
-                                            <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
-                                            <span className="ml-2 text-white">Woman</span>
-                                        </label>
+                                            <label className="flex items-center w-fit cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    value="Woman"
+                                                    {...profileForm.register('gender')}
+                                                    className="peer hidden"
+                                                />
+                                                <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
+                                                <span className="ml-2 text-white">Woman</span>
+                                            </label>
 
-                                        <label className="flex items-center w-fit cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="gender"
-                                                value="Non-binary"
-                                                checked={gender === "Non-binary"}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="peer hidden"
-                                            />
-                                            <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
-                                            <span className="ml-2 text-white">Non-binary</span>
-                                        </label>
+                                            <label className="flex items-center w-fit cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    value="Non-binary"
+                                                    {...profileForm.register('gender')}
+                                                    className="peer hidden"
+                                                />
+                                                <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
+                                                <span className="ml-2 text-white">Non-binary</span>
+                                            </label>
                                         </div>
 
                                         <div className="flex gap-7">
                                             <label className="flex items-center w-fit cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="gender"
-                                                value="Something else"
-                                                checked={gender === "Something else"}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="peer hidden"
-                                            />
-                                            <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
-                                            <span className="ml-2 text-white">Something else</span>
-                                        </label>
+                                                <input
+                                                    type="radio"
+                                                    value="Something else"
+                                                    {...profileForm.register('gender')}
+                                                    className="peer hidden"
+                                                />
+                                                <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
+                                                <span className="ml-2 text-white">Something else</span>
+                                            </label>
 
-                                        <label className="flex items-center w-fit cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="gender"
-                                                value="Prefer not to say"
-                                                checked={gender === "Prefer not to say"}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                className="peer hidden"
-                                            />
-                                            <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
-                                            <span className="ml-2 text-white">Prefer not to say</span>
-                                        </label>
+                                            <label className="flex items-center w-fit cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    value="Prefer not to say"
+                                                    {...profileForm.register('gender')}
+                                                    className="peer hidden"
+                                                />
+                                                <div className="w-4 h-4 hover:border-green-400 rounded-full border-1 border-[#818181] bg-transparent peer-checked:bg-black peer-checked:border-4 peer-checked:border-green-500 transition-all"></div>
+                                                <span className="ml-2 text-white">Prefer not to say</span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
+                                {profileForm.formState.errors.gender && (
+                                    <p className="text-red-500 text-xs mt-1">{profileForm.formState.errors.gender.message}</p>
+                                )}
 
                                 <button type="submit" className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-12" style={{ fontFamily: 'CircularStd', fontWeight: 800 }}>
                                     Sign up
@@ -386,15 +459,11 @@ const Sigup = () => {
                                 <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             )}
-
         </>
     );
 };
 
-export default Sigup;
-
-
+export default Signup;
