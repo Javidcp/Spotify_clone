@@ -313,7 +313,6 @@ const Inside = () => {
 
     return (
         <div className="flex bg-[#121212] text-white min-h-screen">
-            {/* Playlist */}
             <div className="flex-1 rounded-lg" ref={scrollRef}>
                 {playlists.map(item => (
                     <div key={item.id} className="p-7 relative" style={{

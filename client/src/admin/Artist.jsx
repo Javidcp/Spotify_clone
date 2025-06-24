@@ -1,22 +1,41 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/axios'
+import { toast } from 'react-toastify'
 
 const Artist = () => {
     const navigate = useNavigate()
     const [artists, setArtists] = useState([])
 
     useEffect(() => {
-            const fetchSong = async () => {
-                try{
-                    const res = await api.get('/artist')
-                    setArtists(res.data)
-                } catch (err) {
-                    console.error("Error in fetching songs:", err)
-                }
+        const fetchArtist = async () => {
+            try{
+                const res = await api.get('/artist')
+                setArtists(res.data)
+            } catch (err) {
+                console.error("Error in fetching songs:", err)
             }
-            fetchSong()
-        }, [])
+        }
+        fetchArtist()
+    }, [])
+    
+    const handleDeleteArtist = async (artistId) => {
+        const token = localStorage.getItem("accesstoken")
+        try {
+            await api.delete(`/artist/deleteArtist/${artistId}`, {
+                headers : {
+                    Authorization : `Bearer ${token}`
+                }
+            })
+            setArtists((prev) => prev.filter((artist) => artist._id !== artistId));
+            toast.success("Artist deleted successfully");
+        } catch (err) {
+            toast.error("Error deleting artist");
+            console.error(err);
+        }
+    }
+
+
     return (
         <div className='mt-11 text-white min-h-screen'>
             <div className='flex justify-between items-center'>
@@ -33,6 +52,7 @@ const Artist = () => {
                     <th className="border border-[#696969] p-2">Song Name</th>
                     <th className="border border-[#696969] p-2">Followers</th>
                     <th className="border border-[#696969] p-2">Created Date</th>
+                    <th className="border border-[#696969] p-2">Action</th>
                 </tr>
                 {artists.map(artist => (
                     <tr key={artist._id} className="border-b border-[#191919]">
@@ -57,6 +77,14 @@ const Artist = () => {
                         </td>
                         <td className="p-2 border border-[#191919]">
                             {artist.createdAt.slice(0, 10)}
+                        </td>
+                        <td className='flex justify-center gap-3'>
+                            <button onClick={() => navigate(`/admin/editArtist/${artist._id}`)} className='bg-blue-500 py-1 px-3 rounded mt-1'>
+                                Edit
+                            </button>
+                            <button onClick={() => handleDeleteArtist(artist._id)} className='bg-red-600 py-1 px-3 rounded mt-1'>
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 ))}

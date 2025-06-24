@@ -3,9 +3,9 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const User = require("../../models/User")
 const jwt = require('jsonwebtoken');
-const errorHandling = require("../../helper/errorMiddleware")
+const { createError, errorHandling  } = require("../../helper/errorMiddleware")
 
-exports.sendOTP = errorHandling(async (req, res) => {
+exports.sendOTP = errorHandling(async (req, res, next) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedOtp = await bcrypt.hash(otp, 10);
@@ -47,14 +47,14 @@ exports.verifyOTP = errorHandling(async (req, res, next) => {
     const { email, otp } = req.body;
 
         const record = await Otp.findOne({ email });
-        if (!record) return next(new Error("OTP expired or not found"))
+        if (!record) return next(createError(400, "OTP expired or not found"))
 
         const isValid = await bcrypt.compare(otp, record.otp);
-        if (!isValid) return next(new Error("Invalid OTP"))
+        if (!isValid) return next(createError(400, "Invalid OTP"))
 
         let user = await User.findOne({ email });
-        if (!user) return next(new Error("User not found"))
-        if (user && user.isActive === false) return next(new Error("Your account has been blocked. Please contact support"))
+        if (!user) return next(createError(404, "User not found"))
+        if (user && user.isActive === false) return next(createError(403, "Your account has been blocked. Please contact support"))
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "7d"

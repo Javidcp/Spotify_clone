@@ -56,12 +56,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
 ));
 
 const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onPlay }) => (
-    <div
-        className={`grid grid-cols-12 gap-4 py-2 rounded-md hover:bg-[#1d1d1d] transition-colors group cursor-pointer ${
-            currentTrackId === song.id ? 'bg-[#1d1d1d]' : ''
-        }`}
-        onClick={() => onPlay(song.id)}
-    >
+    <div className={`grid grid-cols-12 gap-4 py-2 rounded-md hover:bg-[#1d1d1d] transition-colors group cursor-pointer ${currentTrackId === song.id ? 'bg-[#1d1d1d]' : ''}`} onClick={() => onPlay(song.id)}>
         <div className="col-span-1 flex items-center px-8">
             {currentTrackId === song.id && isPlaying ? (
                 <div className="flex space-x-1">
@@ -198,10 +193,7 @@ const LikedSong = () => {
                 )}
             </div>
             <div className="relative">
-                <button
-                    className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-                    onClick={toggleDropdown}
-                >
+                <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors" onClick={toggleDropdown}>
                     <span className="text-sm">{viewMode}</span>
                     <Menu className="w-4 h-4" />
                 </button>
@@ -288,7 +280,7 @@ const LikedSong = () => {
                 </div>
             );
         }
-    }, [viewMode, songs, currentTrackId, isPlaying, handlePlay]);
+    }, [viewMode]);
 
     return (
         <div className="flex bg-[#121212] text-white min-h-screen">

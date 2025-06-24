@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const errorHandling = require("../../helper/errorMiddleware");
+const { createError, errorHandling } = require("../../helper/errorMiddleware");
 const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -9,7 +9,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateAccessToken = (user) => {
     return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "20m",
+        expiresIn: "30m",
     });
 };
 
@@ -24,12 +24,12 @@ const generateRefreshToken = (user) => {
 exports.checkEmailExists = errorHandling(async (req, res, next) => {
     const { email } = req.body;
     if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+        return next(createError(400, "Email is required" ));
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        return res.status(400).json({ message: "Email is already registered" });
+        return next(createError(400, "Email is already registered" ));
     }
 
     res.status(200).json({ message: "Email is available" });
@@ -42,7 +42,7 @@ exports.registerUser = errorHandling(async (req, res, next) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        return next(new Error("User already exists"));
+        return next(createError(400, "User already exists"));
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -54,8 +54,8 @@ exports.registerUser = errorHandling(async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        secure: false,
+        sameSite: "Lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -78,18 +78,16 @@ exports.loginUser = errorHandling(async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-        return next(new Error("User not registered"));
+        return next(createError(400, "User not registered"));
     }
     
     if (user && user.isActive === false) {
-        return res.status(403).json({
-            message: "Your account has been blocked. Please contact support."
-        });
+        return next(createError(403, "Your account has been blocked. Please contact support."));
     }
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
-        return next(new Error("Invalid password"));
+        return next(createError(400, "Invalid password"));
     }
 
     const accessToken = generateAccessToken(user);
@@ -97,8 +95,8 @@ exports.loginUser = errorHandling(async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        secure: false,
+        sameSite: "Lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -122,17 +120,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
     const { sub: googleId, email, name, picture  } = payload;
 
     let user = await User.findOne({ email });
-
     if (user && !user.googleId) {
-        return res.status(400).json({
-            message: "Email already registered with a different method. Please login with email/password."
-        });
+        return next(createError(400, "Email already registered with a different method. Please login with email/password."));
     }
 
     if (user && user.isActive === false) {
-        return res.status(403).json({
-            message: "Your account has been blocked. Please contact support."
-        });
+        return next(createError(403, "Your account has been blocked. Please contact support."));
     }
 
     if (!user) {
@@ -152,10 +145,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        secure:  process.env.NODE_ENV === "production",
+        sameSite: "Lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    console.log(req.cookies, "cookieeee");
+    
 
     res.json({
         message: "Google login successful",
@@ -174,6 +169,28 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
 
 
 
+exports.forgotPassword = errorHandling(async (req, res, next) => {
+    const { email, newPassword } = req.body;
+    console.log("REQ BODY ===>", req.body);
+
+    
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) return next(createError(404, "User not found" ));
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: "Password updated successfully" });
+    
+})
+
+
+
 exports.updateProfile = errorHandling(async (req, res) => {
     const userId = req.userId;
     const { username } = req.body;
@@ -186,7 +203,7 @@ exports.updateProfile = errorHandling(async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
     if (!updatedUser) {
-        return res.status(404).json({ message: 'User not found' });
+        return next(createError(404, 'User not found' ));
     }
 
     return res.status(200).json({ user: updatedUser });
@@ -198,13 +215,21 @@ exports.updateProfile = errorHandling(async (req, res) => {
 exports.refreshAccessToken = errorHandling(async (req, res, next) => {
     const token = req.cookies.refreshToken;
     if (!token) {
-        return next(new Error("No refresh token provided"));
+        return next(createError(400, "No refresh token provided"));
     }
 
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    const user = await User.findById(decoded.id);
-    const accessToken = generateAccessToken(user);
-    res.json({ token: accessToken });
+    try {
+        const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        const user = await User.findById(decoded.id);
+        if (!user) return next(createError(404, "User not found"));
+        
+        const accessToken = generateAccessToken(user);
+        console.log("Cookies:", req.cookies);
+
+        res.json({ token: accessToken });
+    } catch (error) {
+        return next(createError(403, "Invalid refresh token"));
+    }
 });
 
 

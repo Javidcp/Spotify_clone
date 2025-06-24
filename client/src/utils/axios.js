@@ -7,7 +7,7 @@ const api = axios.create({
 
 const getNewAccessToken = async () => {
     try {
-        const res = await axios.get('http://localhost:5050/api/auth/refresh-token', {
+        const res = await axios.post('http://localhost:5050/api/auth/refresh-token', {}, {
         withCredentials: true,
         });
         return res.data.token;

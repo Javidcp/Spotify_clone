@@ -1,8 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 const SpotifyArtist = () => {
-    const scrollRef = useRef(null);
 
     const artists = [
         {
@@ -50,7 +49,6 @@ const SpotifyArtist = () => {
                     <p className="text-gray-400">Artists you might like</p>
                 </div>
                 <div
-                    ref={scrollRef}
                     className="grid grid-cols-2 sm:grid-cols-4 gap-4  scroll-smooth pb-4 "
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >

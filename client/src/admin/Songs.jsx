@@ -9,7 +9,6 @@ const Songs = () => {
     const [playingId, setPlayingId] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
-
     useEffect(() => {
         const fetchSong = async () => {
             try{

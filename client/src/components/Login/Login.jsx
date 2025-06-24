@@ -14,22 +14,14 @@ const Login = () => {
     const [view, setView] = useState(() => {
         return Number(localStorage.getItem("view")) || 1;
     });
-
-
-
+    const [ loading, setLoading ] = useState(false)
     const navigate = useNavigate()
     const [otp, setOtp] = useState('');
     const dispatch = useDispatch()
+    const { register, handleSubmit, watch, formState: { errors },reset } = useForm({ mode: 'onChange'});
+    const [showResetPassword, setShowResetPassword] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
 
-    const { 
-        register, 
-        handleSubmit, 
-        watch, 
-        formState: { errors },
-        reset 
-    } = useForm({
-        mode: 'onChange'
-    });
 
     const email = watch('email', '');
     const password = watch('password', '');
@@ -39,11 +31,14 @@ const Login = () => {
         if (!data.email) return toast.error("Please enter email");
 
         try {
+            setLoading(true)
             await api.post('/otp/send-otp', { email: data.email });
             setView(2);
         } catch (err) {
             const errorMessage = err.response?.data?.message || "Failed to send OTP";
             toast.error(errorMessage);
+        } finally {
+            setLoading(false)
         }
     }
     console.log(password);
@@ -67,6 +62,28 @@ const Login = () => {
             toast.error(err.response?.data?.message || "OTP verification failed",err);
         }
     };
+
+    const handleResetPassword = async (data) => {
+        try {
+            const response = await api.post('/auth/forgot-password', {
+                email: data.email || email,
+                newPassword: data.newPassword,
+            });
+
+            toast.success(response.data.message);
+            setShowResetPassword(false);
+            console.log("Reset Payload:", {
+    email,
+    newPassword
+});
+
+            setNewPassword("");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Error updating password");
+        }
+    };
+
+
 
     const handleLogin = async (data) => {
         try {
@@ -158,12 +175,8 @@ const Login = () => {
                                 <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
                             )}
                             
-                            <button 
-                                type="submit" 
-                                className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" 
-                                style={{ fontFamily: 'CircularStd', fontWeight: 800 }}
-                            >
-                                Continue
+                            <button type="submit" disabled={loading} className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 800 }}>
+                                { loading ? "sending otp..." : 'Continue' }
                             </button>
                         </form>
 
@@ -290,8 +303,8 @@ const Login = () => {
                                 {...register('password', {
                                     required: 'Password is required',
                                     minLength: {
-                                        value: 10,
-                                        message: 'Password must be at least 10 characters'
+                                        value: 9,
+                                        message: 'Password must be at least 9 characters'
                                     }
                                 })}
                             />
@@ -299,6 +312,45 @@ const Login = () => {
                                 <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
                             )}
                             
+                            <span>
+                                <button type="button" onClick={() => setShowResetPassword(true)} className="text-xs cursor-pointer" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
+                                    Forgot password?
+                                </button>
+                            </span>
+                            {showResetPassword && (
+                                <form onSubmit={handleSubmit(handleResetPassword)} className="w-[320px] text-left mt-4">
+                                    <label htmlFor="new-password" className="text-xs font-bold">New Password</label>
+                                    <input
+                                        type="password"
+                                        id="new-password"
+                                        placeholder="Enter new password"
+                                        className="border border-[#818181] rounded-[4px] p-3 w-full mt-1"
+                                        {...register("newPassword", {
+                                            required: "New password is required",
+                                            minLength: {
+                                            value: 10,
+                                            message: "Password must be at least 10 characters"
+                                            }
+                                        })}
+                                        />
+
+                                    <button 
+                                    type="submit"
+                                    className="w-full text-center p-3 bg-[#1ed760] text-black rounded-full mt-4 font-bold"
+                                    >
+                                    Update Password
+                                    </button>
+
+                                    <button 
+                                    type="button"
+                                    onClick={() => setShowResetPassword(false)}
+                                    className="text-xs underline mt-2 text-gray-400 w-full text-center"
+                                    >
+                                    Cancel
+                                    </button>
+                                </form>
+                                )}
+
                             <button 
                                 type="submit" 
                                 className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" 

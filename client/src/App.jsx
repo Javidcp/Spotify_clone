@@ -34,12 +34,15 @@ import LikedSong from './components/LikedSong';
 import BrowseInterface from './components/Navbar/Browser';
 import CreatePlaylist from './components/CreatePlaylist';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import ErrorPage from './pages/ErrorPage';
+import AuthProtected from './components/Auth/AuthProtected';
+import EditArtist from './admin/EditArtist';
 
 
 
 
 const router = createHashRouter([
-  { path: '', element: <><RootLayout/> <GlobalAudioManager/> </>, children: [
+  { path: '', element: <><RootLayout/> <GlobalAudioManager/> </>, errorElement: <ErrorPage/> , children: [
     { path: '/', element: <Home/> },
     { path: '/search', element: <BrowseInterface/> },
     { path: '/account', element: <Account  /> },
@@ -54,8 +57,8 @@ const router = createHashRouter([
     { path: '/liked', element: <ProtectedRoute><LikedSong/></ProtectedRoute> },
     { path: '/createplaylist', element: <ProtectedRoute><CreatePlaylist/></ProtectedRoute> }
   ]},
-  { path: '/signup', element: <Sigup /> },
-  { path: '/login', element: <Login /> },
+  { path: '/signup', element: <AuthProtected><Sigup /></AuthProtected> },
+  { path: '/login', element: <AuthProtected><Login /></AuthProtected> },
   { path: '/player', element: <ProtectedRoute><BottomPlayer/></ProtectedRoute> },
 
   { path: '/unauthorized', element: <Unauthorized /> },
@@ -66,6 +69,7 @@ const router = createHashRouter([
     { path: 'addSong', element: <AddSong/> },
     { path: 'artist', element: <Artist/> },
     { path: 'addArtist', element: <AdminCreateArtist/> },
+    { path: 'editArtist/:artistId', element: <EditArtist /> }
   ] }
 
 ])

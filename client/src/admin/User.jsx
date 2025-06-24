@@ -49,7 +49,7 @@ const User = () => {
     };
 
     return (
-        <div className="mt-11 text-white">
+        <div className=" text-white min-h-screen">
             <h3 className="text-2xl font-bold text-center mt-20 mb-10">Registered Users</h3>
         <table className="min-w-full border-collapse border border-[#191919]">
             <thead>

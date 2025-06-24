@@ -1,4 +1,4 @@
-const errorHandling = require("../../helper/errorMiddleware");
+const { createError, errorHandling } = require("../../helper/errorMiddleware");
 const User = require("../../models/User")
 
 exports.getAllUsers = async (req, res) => {
@@ -25,3 +25,26 @@ exports.toggleBlockUser = errorHandling(async (req, res, next) => {
     }
     res.status(200).json(updatedUser);
 });
+
+
+
+exports.getUserRegisterationStats = errorHandling( async (req, res, next) => {
+    const userStats = await User.aggregate([
+        {
+            $group: {
+                _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+                total: { $sum: 1 }
+            }
+        },
+        {
+            $sort: { "_id.year": 1, "_id.month": 1 }
+        }
+    ])
+
+    const formatedData = userStats.map(stat => ({
+        month: `${stat._id.month}-${stat._id.year}`,
+        users: stat.total
+    }))
+
+    res.json(formatedData)
+})

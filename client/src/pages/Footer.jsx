@@ -7,7 +7,7 @@ const Footer = () => {
     const navigate = useNavigate()
 
     return (
-        <div className=" text-white bg-[#121212] rounded-b-lg flex flex-col justify-end">
+        <div className=" text-white bg-[#121212] rounded-b-lg hidden sm:flex flex-col justify-end">
             <footer className=" pt-10 pb-8 px-8">
             <div className="border-t border-zinc-800 mb-15"></div>
                 <div className="max-w-7xl mx-auto">
@@ -16,12 +16,12 @@ const Footer = () => {
                     <h3 className="text-white font-semibold text-base mb-4">Company</h3>
                     <ul className="space-y-3">
                         <li>
-                        <a href="https://www.lifeatspotify.com/#_gl=1*1z0ewvu*_gcl_au*MTIwMTA4OTA3NS4xNzQ4NTg3NDUz" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://www.lifeatspotify.com/#_gl=1*1z0ewvu*_gcl_au*MTIwMTA4OTA3NS4xNzQ4NTg3NDUz" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Jobs
                         </a>
                         </li>
                         <li>
-                        <a href="https://newsroom.spotify.com/#_gl=1*12pz50n*_gcl_au*MTIwMTA4OTA3NS4xNzQ4NTg3NDUz" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://newsroom.spotify.com/#_gl=1*12pz50n*_gcl_au*MTIwMTA4OTA3NS4xNzQ4NTg3NDUz" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             For the Record
                         </a>
                         </li>
@@ -32,22 +32,22 @@ const Footer = () => {
                     <h3 className="text-white font-semibold text-base mb-4">Communities</h3>
                     <ul className="space-y-3">
                         <li>
-                        <a href="https://artists.spotify.com/home" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://artists.spotify.com/home" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             For Artists
                         </a>
                         </li>
                         <li>
-                        <a href="https://ads.spotify.com/en-IN/" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://ads.spotify.com/en-IN/" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Advertising
                         </a>
                         </li>
                         <li>
-                        <a href="https://investors.spotify.com/home/default.aspx" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://investors.spotify.com/home/default.aspx" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Investors
                         </a>
                         </li>
                         <li>
-                        <a href="https://spotifyforvendors.com/" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://spotifyforvendors.com/" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Vendors
                         </a>
                         </li>
@@ -58,12 +58,12 @@ const Footer = () => {
                     <h3 className="text-white font-semibold text-base mb-4">Useful links</h3>
                     <ul className="space-y-3">
                         <li>
-                        <a href="https://support.spotify.com/in-en/" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://support.spotify.com/in-en/" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Support
                         </a>
                         </li>
                         <li>
-                        <a href="https://www.spotify.com/in-en/free/" className="text-gray-400 hover:text-white text-sm transition-colors">
+                        <a href="https://www.spotify.com/in-en/free/" target='_blank' className="text-gray-400 hover:text-white text-sm transition-colors">
                             Free Mobile App
                         </a>
                         </li>
@@ -98,25 +98,14 @@ const Footer = () => {
 
                     <div className="flex justify-center  w-full  ">
                     <div className="flex space-x-4">
-                        <a 
-                        href="https://www.instagram.com/spotify/" 
-                        className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
-                        aria-label="Instagram"
-                        >
+                        <a href="https://www.instagram.com/spotify/"  target='_blank' className="w-10 h-10 bg-[#1d1d1d] rounded-full flex items-center justify-center hover:bg-[#252525] transition-colors" aria-label="Instagram" >
                         <Instagram size={18} className="text-white" />
                         </a>
                         <a 
-                        href="https://x.com/spotify" 
-                        className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
-                        aria-label="Twitter"
-                        >
+                        href="https://x.com/spotify"  target='_blank' className="w-10 h-10 bg-[#1d1d1d] rounded-full flex items-center justify-center hover:bg-[#252525] transition-colors" aria-label="Twitter" >
                         <Twitter size={18} className="text-white" />
                         </a>
-                        <a 
-                        href="https://www.facebook.com/SpotifyIndia/?brand_redir=6243987495#" 
-                        className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
-                        aria-label="Facebook"
-                        >
+                        <a href="https://www.facebook.com/SpotifyIndia/?brand_redir=6243987495#"  target='_blank' className="w-10 h-10 bg-[#1d1d1d] rounded-full flex items-center justify-center hover:bg-[#252525] transition-colors" aria-label="Facebook" >
                         <Facebook size={18} className="text-white" />
                         </a>
                     </div>

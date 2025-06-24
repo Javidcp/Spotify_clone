@@ -10,18 +10,15 @@ const otpRoutes = require('./routes/User/OtpRoutes');
 const userRoutes = require("./routes/Admin/userRoute")
 const songRoutes = require("./routes/Admin/songRoutes")
 const artistRoutes = require("./routes/Admin/artistRoute")
-const path = require("path")
+const path = require("path");
+const { errorMiddleware } = require("./helper/errorMiddleware");
 
+dotenv.config()
 
 const app = express()
-const route = express.Router()
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.use(express.json())
-dotenv.config()
 app.use(cookieParser());
-
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
@@ -29,6 +26,7 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
 
+const route = express.Router()
 
 
 connectDB()
@@ -55,6 +53,8 @@ route.get('/me', verifyToken, async (req, res) => {
     }
 });
 app.use('/api/auth', route);
+
+app.use(errorMiddleware)
 
 
 app.listen(process.env.PORT, () => {

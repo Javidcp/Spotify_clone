@@ -6,22 +6,8 @@ import { useNavigate } from 'react-router-dom';
 const BottomPlayer = () => {
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const navigate = useNavigate()
-    const {
-        currentSong,
-        isPlaying,
-        currentTime,
-        duration,
-        volume,
-        isMuted,
-        isLoading,
-        playPause,
-        skipNext,
-        skipPrevious,
-        updateVolume,
-        toggleMuteVolume,
-        audioRef
-    } = usePlayer();
-
+    const { currentSong, isPlaying,currentTime, duration, volume, isMuted, isLoading, playPause, skipNext, skipPrevious, updateVolume, toggleMuteVolume,audioRef} = usePlayer();
+    
     if (!currentSong) return null;
 
     const formatTime = (time) => {
@@ -31,20 +17,16 @@ const BottomPlayer = () => {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
     console.log(showVolumeSlider);
-    
-
     const handleProgressChange = (e) => {
         const newTime = (e.target.value / 100) * duration;
         if (audioRef) {
             audioRef.currentTime = newTime;
         }
     };
-
     const handleVolumeChange = (e) => {
         const newVolume = e.target.value / 100;
         updateVolume(newVolume);
     };
-
     const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
 
     return (
@@ -116,43 +98,27 @@ const BottomPlayer = () => {
             </div>
 
             <div className="flex items-center flex-1 justify-end space-x-3 min-w-0">
-                
-
                 <div className="flex items-center space-x-2 relative">
-                    <button
-                        onClick={toggleMuteVolume}
-                        className="text-gray-400 hover:text-white transition-colors"
-                        onMouseEnter={() => setShowVolumeSlider(true)}
-                    >
+                    <button onClick={toggleMuteVolume} className="text-gray-400 hover:text-white transition-colors" onMouseEnter={() => setShowVolumeSlider(true)} >
                         {isMuted || volume === 0 ? (
                             <VolumeX size={20} />
                         ) : (
                             <Volume2 size={20} />
                         )}
                     </button>
-
-                    
                         
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={isMuted ? 0 : volume * 100}
-                                onChange={handleVolumeChange}
-                                className="w-24 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-                                style={{
-                                    background: `linear-gradient(to right, #ffffff 0%, #fff ${isMuted ? 0 : volume * 100}%, #696969 ${isMuted ? 0 : volume * 100}%, #696969 100%)`
-                                }}
-                            />
-                        
-                    
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={isMuted ? 0 : volume * 100}
+                        onChange={handleVolumeChange}
+                        className="w-24 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                        style={{ background: `linear-gradient(to right, #ffffff 0%, #fff ${isMuted ? 0 : volume * 100}%, #696969 ${isMuted ? 0 : volume * 100}%, #696969 100%)` }}
+                    />
                 </div>
 
-                <button
-                    onClick={() => navigate('/full')}
-                    className="p-2 text-gray-400 hover:text-white transition-colors"
-                    title="Expand"
-                >
+                <button onClick={() => navigate('/full')} className="p-2 text-gray-400 hover:text-white transition-colors" title="Expand" >
                     <Expand size={20} />
                 </button>
             </div>

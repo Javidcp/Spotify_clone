@@ -1,5 +1,5 @@
 const express = require("express")
-const { registerUser, loginUser, googleAuth, checkEmailExists, updateProfile, refreshAccessToken } = require("../../controllers/User/authController")
+const { registerUser, loginUser, googleAuth, checkEmailExists, updateProfile, refreshAccessToken, forgotPassword } = require("../../controllers/User/authController")
 const validate = require('../../middleware/validateRequest');
 const {
     registerSchema,
@@ -15,8 +15,9 @@ const router = express.Router()
 router.post('/register', validate(registerSchema), registerUser)
 router.post('/check-email', checkEmailExists)
 router.post('/login', validate(loginSchema), loginUser)
-router.get('/refresh-token', refreshAccessToken);
+router.post('/refresh-token', refreshAccessToken);
 router.post("/google-auth", validate(googleAuthSchema), googleAuth);
+router.post("/forgot-password", forgotPassword)
 router.put("/update-profile", verifyToken, validate(updateProfileSchema), upload.single('profileImage'), updateProfile)
 
 module.exports = router

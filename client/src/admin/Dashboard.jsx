@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,8 +13,9 @@ const Dashboard = () => {
     const [ users, setUsers ] = useState([])
     const [ songs, setSongs ] = useState([])
     const [ artists, setArtists ] = useState([])
-    const {user, isLoading} = useSelector((state) => state.auth);
+    const { user, isLoading } = useSelector((state) => state.auth);
     const navigate = useNavigate()
+    const [ userData, setUserData ] = useState([])
 
     useEffect(() => {
         if (isLoading) return;
@@ -45,7 +47,20 @@ const Dashboard = () => {
         fetchData();
     }, [user, isLoading, navigate]);
 
-const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+    // const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+    useEffect(() => {
+        const fetchUserStats = async () => {
+            try{
+                const res = await api.get('/auth/user-stats')
+                setUserData(res.data)
+            } catch (err) {
+                console.error("Error fetch user stats:", err);
+            }
+        }
+
+        fetchUserStats()
+    }, [])
 
 
     return (
@@ -74,27 +89,16 @@ const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a
                 </div>
             </div>
 
-            <h1 className="text-2xl font-bold text-center mt-20 mb-10">Recent registered Users</h1>
-            <table className="w-full  mt-3 ">
-                <thead>
-                    <tr className="bg-[#131313]">
-                        <th className="p-2">User</th>
-                        <th className="p-2">Email</th>
-                        <th className="p-2">Registered</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    { recentUsers.map((user, index) => (
-                        <tr key={index} className="border-b border-[#191919] text-center">
-                            <td className="p-2">
-                                {user.username.toUpperCase()}
-                            </td>
-                            <td className="p-2">{user.email}</td>
-                            <td className="p-2">{new Date(user.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div>
+                <h1 className="text-2xl font-bold text-center mt-20 mb-10">Recent registered Users</h1>
+                <LineChart width={500} height={300} className='bg-white' data={userData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="users" stroke="#8884d8" strokeWidth={2} />
+                </LineChart>
+            </div>
         </div>
     )
 }

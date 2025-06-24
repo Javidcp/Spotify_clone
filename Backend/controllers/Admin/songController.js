@@ -1,6 +1,8 @@
 const Song = require('../../models/Song');
 const Artist = require('../../models/Artist');
-const errorHandling = require("../../helper/errorMiddleware")
+const dotenv = require("dotenv")
+const { createError, errorHandling } = require("../../helper/errorMiddleware")
+dotenv.config()
 
 exports.addSong = errorHandling(async (req, res, next) => {
     const { title, artist, genre, duration } = req.body;

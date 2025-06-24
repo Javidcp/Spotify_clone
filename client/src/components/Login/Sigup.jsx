@@ -80,7 +80,6 @@ const Signup = () => {
     const handleRegistration = async (data) => {
         try {
             const dob = `${data.dobYear}-${data.dobMonth.padStart(2, '0')}-${data.dobDay.padStart(2, '0')}`;
-            
             const userData = {
                 username: data.name,
                 email: emailForm.getValues('email'),
@@ -92,7 +91,6 @@ const Signup = () => {
             const res = await api.post("/auth/register", userData, {
                 withCredentials: true,
             });
-
             console.log("User registered:", res.data);
 
             localStorage.setItem("accessToken", res.data.token);

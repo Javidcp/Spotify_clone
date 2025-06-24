@@ -1,8 +1,6 @@
-import React from 'react'
 import { MdDashboard, MdMicExternalOn  } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { IoMusicalNotesSharp } from "react-icons/io5";
-
 import { useLocation, Link } from 'react-router-dom';
 import Logo from "../assets/spotify-logo-full.png"
 

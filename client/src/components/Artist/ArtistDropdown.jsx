@@ -1,15 +1,14 @@
 import React, { useRef, useEffect } from 'react';
-import { ChevronRight, Heart, Plus, ListMusic, Radio, User, Disc, FileText, Image, Share } from 'lucide-react';
+import { ChevronRight, Heart, Plus, ListMusic, Radio, User, Disc, FileText, Image, Share, Ban  } from 'lucide-react';
 
 const defaultItems = [
-        { label: "Add to Playlist", icon: Plus },
-        { label: "Like", icon: Heart },
-        { label: "Go to Artist", icon: User },
-        { label: "Go to Album", icon: Disc },
-        { label: "Share", icon: Share },
-    ];
+    { label: "Follow", icon: User },
+    { label: "Don't play this artist", icon: Ban  },
+    { label: "Go to artist radio", icon: Disc },
+    { label: "Share", icon: Share },
+];
 
-    const Dropdown = ({
+const ArtistDropdown = ({
         width = 'w-64',
         position = 'right',
         isOpen = false,
@@ -41,10 +40,10 @@ const defaultItems = [
 
     if (!isOpen) return null;
 
-    return (
+return (
         <div
         ref={dropdownRef}
-        className={`absolute top-full mt-2 ${width} ${positionClasses[position]} bg-[#1e1e1e] rounded-lg shadow-xl py-2 z-50`}
+        className={`absolute top-full mt-5 left-[-45px] ${width} ${positionClasses[position]} bg-[#1e1e1e] rounded-lg shadow-xl py-2 z-50`}
         >
         {defaultItems.map((item, index) => (
             <button
@@ -65,4 +64,4 @@ const defaultItems = [
     );
 };
 
-export default Dropdown;
+export default ArtistDropdown;

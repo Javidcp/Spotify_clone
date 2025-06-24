@@ -119,7 +119,7 @@ const SongCarousel = () => {
 
   return (
     <div className="bg-[#121212] text-white pb-15 p-8">
-      <div className="relative">
+      <div className="w-full mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">India's Best</h2>
           <button onClick={() => navigate('/indiabest')} className="text-xs text-zinc-400 font-semibold hover:border-b border-white h-fit hover:text-xs">
@@ -140,7 +140,6 @@ const SongCarousel = () => {
               </button>
             )}
 
-          <div className="overflow-hidden">
             <div 
               ref={scrollRef}
                 onScroll={handleScroll}
@@ -151,9 +150,9 @@ const SongCarousel = () => {
                 <Link 
                   key={playlist.id}
                   to='/playlist'
-                  className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 flex-shrink-0 px-2"
+                  className="flex-shrink-0 w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card"
                 >
-                  <div className="p-4 rounded-lg hover:bg-[#1d1d1d] transition-all duration-300 cursor-pointer group/card">
+                  <div className="rounded-lg hover:bg-[#1d1d1d]">
                     <div className="relative mb-4 overflow-hidden rounded-lg">
                       <div className={`aspect-square ${playlist.color} relative`}>
                         <div className="absolute top-3 left-3 w-6 h-6 bg-black bg-opacity-40 rounded-full flex items-center justify-center">
@@ -163,7 +162,7 @@ const SongCarousel = () => {
                         </div>
                         
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <h3 className="text-white font-bold text-lg text-center px-4 drop-shadow-lg">
+                          <h3 className="text-white font-bold text-sm sm:text-lg text-center px-4 drop-shadow-lg">
                             {playlist.title}
                           </h3>
                         </div>
@@ -191,7 +190,6 @@ const SongCarousel = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

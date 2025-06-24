@@ -13,7 +13,6 @@ import { Bell } from 'lucide-react';
 
 
 const Navbar = () => {
-
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -21,7 +20,6 @@ const Navbar = () => {
 
     const isLogged = useSelector(state => state.auth.isAuthenticated);
     const user = useSelector(state => state.auth.user);
-
 
     const handleLogout = () => {
         localStorage.removeItem("accessToken");
@@ -42,13 +40,11 @@ const Navbar = () => {
 
     const toggleDropdown = () => setIsOpen(!isOpen);
 
-
-
     return (
         <div className='h-16 pl-7 bg-black flex items-center justify-between'>
             <div className="flex items-center">
                 <img src={Logo} className='w-8 h-8' alt="" />
-                <button onClick={() => navigate('/')} className='bg-[#1F1F1F] text-white p-[10px] ml-6 mr-2 hidden md:block rounded-full'>
+                <button onClick={() => navigate('/')} className='bg-[#1F1F1F] text-white p-[10px] cursor-pointer ml-6 mr-2 hidden md:block rounded-full'>
                     <GoHomeFill size={28}  />
                 </button>
                 <span  className="hidden md:block w-[400px]">
@@ -74,23 +70,20 @@ const Navbar = () => {
                 )}
             { !isLogged && !user ? (
                 <div className='flex items-center gap-4'>
-                <Link to='/signup' className='text-zinc-400 block md:hidden' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Sign up</Link>
-                <button onClick={() => navigate('/login')} className='h-10 w-20 md:h-12 md:w-28 mr-2 rounded-full bg-white flex items-center justify-center' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
-                    Log in
-                </button>
-            </div>
+                    <Link to='/signup' className='text-zinc-400 block md:hidden' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Sign up</Link>
+                    <button onClick={() => navigate('/login')} className='h-10 w-20 md:h-12 md:w-28 mr-2 rounded-full bg-white flex items-center justify-center' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+                        Log in
+                    </button>
+                </div>
             ) : (
                 <>
                     <div className='flex items-center mr-1 gap-3'>
-                    <button onClick={() => navigate('/premium')} className='bg-white py-2 px-4 rounded-full'>
-                        Explore Premium
-                    </button>
-                    <button onClick={() => navigate('/notification')}><Bell size={20} className='text-[#818181]' /></button>
+                        <button onClick={() => navigate('/premium')} className='bg-white py-2 px-4 rounded-full cursor-pointer'>
+                            Explore Premium
+                        </button>
+                        <button onClick={() => navigate('/notification')}><Bell size={20} className='text-[#818181]' /></button>
                         <div className='relative'>
-                            <button
-                                onClick={toggleDropdown}
-                                className="w-full flex items-center justify-center transition-all duration-200 transform hover:scale-105 "
-                            >
+                            <button onClick={toggleDropdown} className="w-full flex items-center  cursor-pointer  justify-center transition-all duration-200 transform hover:scale-105 " >
                                 <Profile/>
                             </button>
                             <div
@@ -107,16 +100,12 @@ const Navbar = () => {
                                     >
                                         View Profile
                                     </button>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="flex text-center w-[100%] px-4 py-3 hover:bg-[#444444]  transition-colors duration-150"
-                                    >
+                                    <button onClick={handleLogout} className="flex text-center w-[100%] px-4 py-3 hover:bg-[#444444] transition-colors duration-150">
                                         Logout
                                     </button>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </>
             )}
