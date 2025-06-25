@@ -10,6 +10,7 @@ const otpRoutes = require('./routes/User/OtpRoutes');
 const userRoutes = require("./routes/Admin/userRoute")
 const songRoutes = require("./routes/Admin/songRoutes")
 const artistRoutes = require("./routes/Admin/artistRoute")
+const genreRoutes = require("./routes/Admin/genreRoute")
 const path = require("path");
 const { errorMiddleware } = require("./helper/errorMiddleware");
 
@@ -37,6 +38,7 @@ app.use('/api/otp', otpRoutes)
 app.use('/api/auth', userRoutes)
 app.use('/api/songs', songRoutes)
 app.use('/api/artist', artistRoutes)
+app.use('/api', genreRoutes)
 
 
 

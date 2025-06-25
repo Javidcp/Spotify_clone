@@ -1,6 +1,7 @@
 import { MdDashboard, MdMicExternalOn  } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { IoMusicalNotesSharp } from "react-icons/io5";
+import { ListMusic  } from "lucide-react"
 import { useLocation, Link } from 'react-router-dom';
 import Logo from "../assets/spotify-logo-full.png"
 
@@ -31,6 +32,11 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
                 <li className="mb-3">
                     <Link to="/admin/artist" className={`flex gap-2 p-2 rounded ${location.pathname.startsWith("/admin/artist") ? "bg-gray-200 pl-5 text-black" : "hover:text-gray-400"}`}>
                         <MdMicExternalOn  className="mt-1" />Artist
+                    </Link>
+                </li>
+                <li className="mb-3">
+                    <Link to="/admin/genre" className={`flex gap-2 p-2 rounded ${location.pathname.startsWith("/admin/genre") ? "bg-gray-200 pl-5 text-black" : "hover:text-gray-400"}`}>
+                        <ListMusic className="mt-1" size={18} />Genre Playlist
                     </Link>
                 </li>
             </ul>

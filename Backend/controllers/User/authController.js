@@ -9,7 +9,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateAccessToken = (user) => {
     return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "30m",
+        expiresIn: "60m",
     });
 };
 
@@ -172,16 +172,12 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
 exports.forgotPassword = errorHandling(async (req, res, next) => {
     const { email, newPassword } = req.body;
     console.log("REQ BODY ===>", req.body);
-
     
-        // Find user by email
         const user = await User.findOne({ email });
         if (!user) return next(createError(404, "User not found" ));
 
-        // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update the user's password
         user.password = hashedPassword;
         await user.save();
 

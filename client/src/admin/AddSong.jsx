@@ -14,15 +14,26 @@ const AddSong = () => {
     } = useForm({ mode: "onChange" });
 
     const [artists, setArtists] = useState([]);
+    const [genres, setGenres] = useState([]);
+
 
     useEffect(() => {
         const fetchArtists = async () => {
         try {
-            const res = await api.get("/artist");
-            const sortedArtists = res.data.sort((a, b) =>
+            const [artistRes, genreRes] = await Promise.all([
+                api.get("/artist"),
+                api.get("/genreName"),
+            ]);
+
+            const sortedArtists = artistRes.data.sort((a, b) =>
                 a.name.toLowerCase().localeCompare(b.name.toLowerCase())
             );
             setArtists(sortedArtists);
+
+            const sortedGenres = genreRes.data.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            );
+            setGenres(sortedGenres);
         } catch (err) {
             console.error("Failed to fetch artists:", err);
         }
@@ -188,25 +199,20 @@ const AddSong = () => {
             <label className="text-xs mt-1">Genre:</label>
             <select
                 {...register("genre", { required: "Genre is required" })}
-                className={`border p-2 rounded-md ${ errors.genre ? "border-red-500" : "border-[#696969]"} bg-[#1e1e1e]`}
-            >
+                className={`border p-2 rounded-md ${
+                    errors.genre ? "border-red-500" : "border-[#696969]"
+                } bg-[#1e1e1e]`}
+                >
                 <option value="">Select Genre</option>
-                <option value="Pop">Pop</option>
-                <option value="Rock">Rock</option>
-                <option value="Hip-Hop">Hip-Hop</option>
-                <option value="Feel Hood">Feel Hood</option>
-                <option value="Bollywood">Bollywood</option>
-                <option value="Romantic">Romantic</option>
-                <option value="Lo-fi">Lo-fi</option>
-                <option value="Sad Songs">Sad Songs</option>
-                <option value="Focus Study">Focus Study</option>
-                <option value="Arabic">Arabic</option>
-                <option value="Other">Other</option>
+                {genres.map((genre) => (
+                    <option key={genre._id} value={genre.name}>
+                    {genre.name}
+                    </option>
+                ))}
             </select>
             {errors.genre && (
                 <p className="text-red-400 text-xs">{errors.genre.message}</p>
             )}
-
 
             <button
                 type="submit"

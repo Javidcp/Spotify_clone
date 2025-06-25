@@ -37,6 +37,8 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import ErrorPage from './pages/ErrorPage';
 import AuthProtected from './components/Auth/AuthProtected';
 import EditArtist from './admin/EditArtist';
+import GenrePlaylistForm from './admin/GenrePlaylistForm';
+import GenreInside from './admin/GenreInside';
 
 
 
@@ -69,7 +71,9 @@ const router = createHashRouter([
     { path: 'addSong', element: <AddSong/> },
     { path: 'artist', element: <Artist/> },
     { path: 'addArtist', element: <AdminCreateArtist/> },
-    { path: 'editArtist/:artistId', element: <EditArtist /> }
+    { path: 'editArtist/:artistId', element: <EditArtist /> },
+    { path: 'genre', element: <GenrePlaylistForm/> },
+    { path: 'genre/:id', element: <GenreInside/> }
   ] }
 
 ])

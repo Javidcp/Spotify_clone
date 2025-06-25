@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -47,8 +48,6 @@ const Dashboard = () => {
         fetchData();
     }, [user, isLoading, navigate]);
 
-    // const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-
     useEffect(() => {
         const fetchUserStats = async () => {
             try{
@@ -61,6 +60,9 @@ const Dashboard = () => {
 
         fetchUserStats()
     }, [])
+
+    const dates = userData.map( stat => stat.date );
+    const counts = userData.map( stat => stat.count );
 
 
     return (
@@ -89,18 +91,49 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div>
-                <h1 className="text-2xl font-bold text-center mt-20 mb-10">Recent registered Users</h1>
-                <LineChart width={500} height={300} className='bg-white' data={userData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="users" stroke="#8884d8" strokeWidth={2} />
-                </LineChart>
+            <h1 className="text-2xl font-bold text-center mt-20 mb-10">Recent registered Users</h1>
+            <div className='text-white'>
+                <ThemeProvider theme={theme}>
+                    <LineChart 
+                        xAxis={[{ scaleType: 'point', data: dates, label: "Date", labelStyle: { fill: '#fff', fontSize: 14, fontWeight: 'bold' },  tickLabelStyle: { fill: '#fff' }, axisLine: { stroke : "#fff", strokeWidth: 2 }}]}
+                        yAxis={[{ label: 'Users', tickLabelStyle: { fill: '#fff', fontSize: 12 },labelStyle: { fill: '#fff', fontSize: 14, fontWeight: 'bold' },}]}
+                        series={[{ data: counts,  curve: 'monotoneY', showMark: true, area: true, id: "userr" }]}
+                        height={300}
+                        colors={['#1ED760']}
+                        sx={{ borderRadius: 5, marginLeft: 16, marginRight: 16,[`.${axisClasses.root}`]: {
+                            [`.${axisClasses.tick}, .${axisClasses.line}`]: {
+                                stroke: '#fff',
+                                strokeWidth: 2,
+                            },
+                            [`.${axisClasses.tickLabel}`]: {
+                                fill: '#006BD6',
+                            },
+                            [`.${axisClasses.label}`]: {
+                                fill: '#006BD6',
+                            },
+                            }, 
+                        }} 
+                    />
+                </ThemeProvider>
             </div>
         </div>
     )
 }
-
 export default Dashboard
+
+
+
+
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+const theme = createTheme({
+    components: {
+        MuiChartsLegend: {
+            styleOverrides: {
+                root: {
+                color: '#000',
+                fontSize: '14px',
+                },
+            },
+        },
+    },
+});

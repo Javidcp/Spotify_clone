@@ -10,7 +10,7 @@ const songSchema = new mongoose.Schema({
     duration: { type: String, required: true },
     url: { type: String, required: true },
     playCount: { type: Number, default: 0 },
-    genre: { type: String },
+    genre: { type: mongoose.Schema.Types.ObjectId, ref: "GenrePlaylist" },
     createdAt: { type: Date, default: Date.now },
 })
 

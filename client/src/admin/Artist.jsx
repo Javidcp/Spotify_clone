@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import api from '../utils/axios'
 import { toast } from 'react-toastify'
 
+
+const USERS_PER_PAGE = 10;
+
 const Artist = () => {
     const navigate = useNavigate()
     const [artists, setArtists] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const fetchArtist = async () => {
@@ -36,6 +40,11 @@ const Artist = () => {
     }
 
 
+    const totalPages = Math.ceil(artists.length / USERS_PER_PAGE);
+    const startIndex = (currentPage - 1) * USERS_PER_PAGE;
+    const paginatedArtists = artists.slice(startIndex, startIndex + USERS_PER_PAGE);
+
+
     return (
         <div className='mt-11 text-white min-h-screen'>
             <div className='flex justify-between items-center'>
@@ -54,7 +63,7 @@ const Artist = () => {
                     <th className="border border-[#696969] p-2">Created Date</th>
                     <th className="border border-[#696969] p-2">Action</th>
                 </tr>
-                {artists.map(artist => (
+                {paginatedArtists.map(artist => (
                     <tr key={artist._id} className="border-b border-[#191919]">
                         <td className="p-2 border border-[#191919]">
                             <img src={artist.image} className='w-8' alt="" />
@@ -89,6 +98,22 @@ const Artist = () => {
                     </tr>
                 ))}
             </table>
+
+            <div className="flex justify-center mt-6 space-x-2">
+                <button className="px-3 py-1 bg-[#191919] rounded disabled:opacity-50" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                    Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button key={i + 1} onClick={() => setCurrentPage(i + 1)} className={`px-3 py-1 rounded ${ currentPage === i + 1 ? "bg-[#1ED760]" : "bg-[#191919]" }`}>
+                        {i + 1}
+                    </button>
+                ))}
+
+                <button className="px-3 py-1 bg-[#191919] rounded disabled:opacity-50" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} >
+                    Next
+                </button>
+            </div>
         </div>
     )
 }

@@ -29,22 +29,43 @@ exports.toggleBlockUser = errorHandling(async (req, res, next) => {
 
 
 exports.getUserRegisterationStats = errorHandling( async (req, res, next) => {
-    const userStats = await User.aggregate([
-        {
-            $group: {
-                _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
-                total: { $sum: 1 }
-            }
-        },
-        {
-            $sort: { "_id.year": 1, "_id.month": 1 }
+
+  const today = new Date();
+  const last7Days = new Date();
+  last7Days.setDate(today.getDate() - 6);
+  
+    const result = await User.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: last7Days,
+            $lte: today
+          }
         }
-    ])
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
 
-    const formatedData = userStats.map(stat => ({
-        month: `${stat._id.month}-${stat._id.year}`,
-        users: stat.total
-    }))
+    const statsMap = {};
+    result.forEach(item => statsMap[item._id] = item.count);
 
-    res.json(formatedData)
+    const stats = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      const formatted = date.toISOString().slice(0, 10);
+      stats.push({ date: formatted, count: statsMap[formatted] || 0 });
+    }
+
+    res.json(stats);
 })

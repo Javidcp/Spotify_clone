@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../hooks/redux';
 import useAuth from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
+import api from '../../utils/axios';
 
 const SongCarousel = () => {
   const scrollRef = useRef(null);
@@ -11,6 +13,7 @@ const SongCarousel = () => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const { playTrack } = usePlayer()
+  const [play, setPlay] = useState([])
 
   const playlists = [
     {
@@ -91,6 +94,18 @@ const SongCarousel = () => {
       color: "bg-gradient-to-br from-teal-500 to-indigo-600"
     }
   ];
+
+  useEffect(() => {
+    const handleSongs = async () => {
+      try {
+          const res = api.get('/genre')
+          setPlay(res.data)
+      } catch (err) {
+        toast.error("Error in fetching Playlist:", err)
+      }
+    }
+    handleSongs()
+  }, [])
 
       const scroll = (direction) => {
         const container = scrollRef.current;

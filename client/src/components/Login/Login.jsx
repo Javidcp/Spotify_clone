@@ -1,6 +1,6 @@
 import Logo from "../../assets/spotify_icon-white.png"
 import { GoogleLogin } from '@react-oauth/google';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import api from "../../utils/axios"
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,28 @@ const Login = () => {
     const { register, handleSubmit, watch, formState: { errors },reset } = useForm({ mode: 'onChange'});
     const [showResetPassword, setShowResetPassword] = useState(false);
     const [newPassword, setNewPassword] = useState('');
+    const [disabled, setDisabled] = useState(true);
+    const [timer, setTimer] = useState(30);
+
+    useEffect(() => {
+        let interval;
+        if (disabled && timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        } else if (timer === 0) {
+            setDisabled(false);
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [disabled, timer]);
+
+    const handleClick = () => {
+        setDisabled(true);
+        setTimer(30);
+        toast.info('OTP resent');
+        handleOtp({ email });
+    };
 
 
     const email = watch('email', '');
@@ -73,11 +95,10 @@ const Login = () => {
             toast.success(response.data.message);
             setShowResetPassword(false);
             console.log("Reset Payload:", {
-    email,
-    newPassword
-});
-
-            setNewPassword("");
+                email,
+                newPassword
+            });
+            reset()
         } catch (err) {
             toast.error(err.response?.data?.message || "Error updating password");
         }
@@ -106,6 +127,14 @@ const Login = () => {
             reset();
         } catch (err) {
             toast.error(err.response?.data?.message || "Login failed");
+        }
+    };
+
+    const onSubmit = (data) => {
+        if (showResetPassword) {
+            handleResetPassword(data);
+        } else {
+            handleLogin(data);
         }
     };
 
@@ -214,14 +243,12 @@ const Login = () => {
                         />
                         
                         <button
-                            className="mt-4 text-white bg-transparent border border-[#818181] px-3 py-1 rounded-full text-sm"
+                            className={`mt-4 w-30 bg-transparent border px-3 py-1 rounded-full text-sm ${ disabled ? 'border-[#191919] text-[#818181]' : 'border-[#818181] text-white hover:bg-[#81818133]'}`}
                             style={{ fontFamily: 'CircularStd', fontWeight: 900 }}
-                            onClick={() => {
-                                toast.info('OTP resent');
-                                handleOtp({ email });
-                            }}
+                            onClick={handleClick}
+                            disabled={disabled}
                         >
-                            Resend code
+                            {disabled ? `Resend in ${timer}s` : 'Resend code'}
                         </button>
 
                         <button 
@@ -267,98 +294,70 @@ const Login = () => {
 
                         <hr className="w-[80%] my-8 text-zinc-800" />
 
-                        <form onSubmit={handleSubmit(handleLogin)} className="my-5 w-[320px] text-left">
-                            <label htmlFor="email-login" className="text-xs" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
-                                Email address
-                            </label><br />
-                            <input 
+                        <form onSubmit={handleSubmit(onSubmit)}  className="my-5 w-[320px] text-left">
+                            <label htmlFor="email-login" className="text-xs font-bold">Email address</label>
+                            <input
                                 id="email-login"
-                                type="email" 
-                                placeholder="name@domain.com" 
-                                className={`border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 ${
-                                    errors.email ? 'border-red-500' : 'border-[#818181]'
-                                }`}
+                                type="email"
+                                placeholder="name@domain.com"
+                                className={`border-[0.1rem] rounded-[4px] p-3 w-full mt-1 ${errors.email ? 'border-red-500' : 'border-[#818181]'}`}
                                 {...register('email', {
-                                    required: 'Email is required',
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: 'Invalid email address'
-                                    }
+                                required: 'Email is required',
+                                pattern: {
+                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                    message: 'Invalid email address'
+                                }
                                 })}
                             />
-                            {errors.email && (
-                                <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-                            )}
-                            
-                            <label htmlFor="password" className="text-xs mt-4 block" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
-                                Password
-                            </label>
-                            <input 
-                                id="password"
-                                type="password" 
-                                placeholder="password" 
-                                className={`border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 ${
-                                    errors.password ? 'border-red-500' : 'border-[#818181]'
-                                }`}
-                                {...register('password', {
-                                    required: 'Password is required',
-                                    minLength: {
-                                        value: 9,
-                                        message: 'Password must be at least 9 characters'
-                                    }
-                                })}
-                            />
-                            {errors.password && (
-                                <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
-                            )}
-                            
-                            <span>
-                                <button type="button" onClick={() => setShowResetPassword(true)} className="text-xs cursor-pointer" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
-                                    Forgot password?
-                                </button>
-                            </span>
-                            {showResetPassword && (
-                                <form onSubmit={handleSubmit(handleResetPassword)} className="w-[320px] text-left mt-4">
-                                    <label htmlFor="new-password" className="text-xs font-bold">New Password</label>
+                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+
+                            {!showResetPassword ? (
+                                <>
+                                    <label htmlFor="password" className="text-xs mt-4 block font-bold">Password</label>
                                     <input
+                                        id="password"
                                         type="password"
-                                        id="new-password"
-                                        placeholder="Enter new password"
-                                        className="border border-[#818181] rounded-[4px] p-3 w-full mt-1"
-                                        {...register("newPassword", {
-                                            required: "New password is required",
-                                            minLength: {
-                                            value: 10,
-                                            message: "Password must be at least 10 characters"
-                                            }
+                                        placeholder="password"
+                                        className={`border-[0.1rem] rounded-[4px] p-3 w-full mt-1 ${errors.password ? 'border-red-500' : 'border-[#818181]'}`}
+                                        {...register('password', {
+                                        required: 'Password is required',
+                                        minLength: {
+                                            value: 9,
+                                            message: 'Password must be at least 9 characters'
+                                        }
                                         })}
-                                        />
+                                    />
+                                    {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
 
-                                    <button 
-                                    type="submit"
-                                    className="w-full text-center p-3 bg-[#1ed760] text-black rounded-full mt-4 font-bold"
-                                    >
-                                    Update Password
-                                    </button>
+                                    <button type="button" onClick={() => setShowResetPassword(true)} className="text-xs text-blue-500 mt-2">Forgot password?</button>
+                                </>
+                            ) : (
+                                <>
+                                    <label htmlFor="new-password" className="text-xs mt-4 block font-bold">New Password</label>
+                                    <input
+                                        id="new-password"
+                                        type="password"
+                                        placeholder="Enter new password"
+                                        className={`border-[0.1rem] rounded-[4px] p-3 w-full mt-1 ${errors.newPassword ? 'border-red-500' : 'border-[#818181]'}`}
+                                        {...register('newPassword', {
+                                        required: 'New password is required',
+                                        minLength: {
+                                            value: 10,
+                                            message: 'Password must be at least 10 characters'
+                                        }
+                                        })}
+                                    />
+                                    {errors.newPassword && <p className="text-red-500 text-xs mt-1">{errors.newPassword.message}</p>}
 
-                                    <button 
-                                    type="button"
-                                    onClick={() => setShowResetPassword(false)}
-                                    className="text-xs underline mt-2 text-gray-400 w-full text-center"
-                                    >
-                                    Cancel
-                                    </button>
-                                </form>
-                                )}
+                                    <button type="button" onClick={() => setShowResetPassword(false)} className="text-xs text-gray-500 mt-2 underline">Cancel</button>
+                                </>
+                            )}
 
-                            <button 
-                                type="submit" 
-                                className="w-[100%] text-center p-3 bg-[#1ed760] text-black rounded-full mt-5" 
-                                style={{ fontFamily: 'CircularStd', fontWeight: 800 }}
-                            >
-                                Sign in
+                            <button type="submit" className="w-full text-center p-3 bg-[#1ed760] text-black rounded-full mt-5 font-bold">
+                                {showResetPassword ? "Update Password" : "Sign in"}
                             </button>
                         </form>
+
                         
                         <div>
                             <button 
