@@ -10,9 +10,7 @@ exports.addSong = errorHandling(async (req, res, next) => {
 
     const songFile = req.files['url'] ? req.files['url'][0].path : null;
     const coverImageFile = req.files['coverImage'] ? req.files['coverImage'][0].path : null;
-
     if (!songFile) return next(new Error("Audio file is required"))
-
     const genreDoc = await GenrePlaylist.findOne({ name: genre });
     if (!genreDoc) return next(new Error("Invalid genre"));
 
@@ -38,3 +36,55 @@ exports.getAllSongs = errorHandling(async (req, res) => {
     const songs = await Song.find().populate('artist').populate("genre");
     res.status(200).json(songs);
 });
+
+
+
+exports.deleteSong = errorHandling(async (req, res, next) => {
+    const { songId } = req.params;
+    const song = await Song.findByIdAndDelete( songId )
+    if (!song) return next(createError(404, "Songs not found"))
+    res.status(200).json(song)
+})
+
+
+
+exports.updateSong = errorHandling(async (req, res, next) => {
+        const { title, duration, playCount, genre } = req.body;
+        let artist = req.body.artist;
+
+        if (!Array.isArray(artist)) {
+            artist = artist?.split(',').map((id) => id.trim()).filter(Boolean);
+        }
+
+        const song = await Song.findById(req.params.id);
+        if (!song) return next(createError(404, 'Song not found' ));
+
+        song.title = title || song.title;
+        song.duration = duration || song.duration;
+        song.genre = genre || song.genre;
+        song.artist = artist || song.artist;
+
+        if (req.files?.coverImage?.[0]) {
+            song.coverImage = `/uploads/${req.files.coverImage[0].filename}`;
+        }
+
+        if (req.files?.songFile?.[0]) {
+            song.url = `/uploads/${req.files.songFile[0].filename}`;
+        }
+
+        await song.save();
+
+        res.status(200).json(song);
+});
+
+
+
+
+exports.getSingleSong = errorHandling( async (req, res, next) => {
+    const { songId } = req.params;
+    const song = await Song.findById( songId ).populate('artist').populate("genre")
+
+    if ( !song ) return next(createError(404, "Song not found"))
+
+    res.status(200).json( song )
+})

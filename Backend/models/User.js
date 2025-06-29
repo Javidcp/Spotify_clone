@@ -15,7 +15,14 @@ const userSchema = new mongoose.Schema({
     googleId: { type: String, default: null },
     isPremium: { type: Boolean, default: false },
     role: { type: String, default: "user", enum: ["user", "admin"] },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    recentlyPlayed: [
+        {
+        itemType: { type: String, enum: ['song', 'artist', 'playlist'] },
+        itemId: mongoose.Schema.Types.ObjectId,
+        playedAt: { type: Date, default: Date.now }
+    }
+    ]
 }, { timestamps: true })
 
 

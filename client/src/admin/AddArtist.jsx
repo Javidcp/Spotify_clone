@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AdminCreateArtist = () => {
     const { register, handleSubmit, reset, formState: { isSubmitting, isValid, isDirty, errors }, watch } = useForm({ mode: 'onChange' });
     const [error, setError] = useState('')
+    const navigate = useNavigate()
 
     const onSubmit = async (data) => {
         const formData = new FormData();
@@ -19,6 +21,7 @@ const AdminCreateArtist = () => {
                 },
             });
             toast.success(`Artist "${res.data.name}" created successfully!`);
+            navigate('/admin/artist')
             reset();
         } catch (err) {
             

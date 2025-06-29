@@ -76,7 +76,7 @@ const Artist = () => {
                         </td>
                         <td className="p-2 border border-[#191919]">
                             {artist.songs.map(a => (
-                                <span key={a._id}>{a.title}</span>
+                                <span key={a._id}>{a.title},<br /></span>
                             ))}
                         </td>
                         

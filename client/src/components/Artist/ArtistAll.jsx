@@ -1,45 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import api from '../../utils/axios';
+import { toast } from 'react-toastify';
 
 const SpotifyArtist = () => {
+    const [artists, setArtist] = useState([])
 
-    const artists = [
-        {
-        id: 1,
-        name: "Taylor Swift",
-        image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 2,
-        name: "The Weeknd",
-        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 4,
-        name: "Drake",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 5,
-        name: "Billie Eilish",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 6,
-        name: "Ed Sheeran",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 7,
-        name: "Dua Lipa",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 8,
-        name: "Post Malone",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-        }
-    ];
+    useEffect(() => {
+    const handleArtists = async () => {
+      try {
+          const res = await api.get('/artist')
+          setArtist(res.data)
+          console.log(res.data);
+          
+      } catch (err) {
+        toast.error("Error in fetching Playlist:", err)
+      }
+    }
+    handleArtists()
+  }, [])
 
     return (
         <div className="bg-[#121212] text-white p-6">

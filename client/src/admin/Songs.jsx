@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/axios'
+import { toast } from 'react-toastify';
 
 
 const USERS_PER_PAGE = 10;
@@ -45,6 +46,18 @@ const Songs = () => {
         }
     };
 
+
+    const handleDeleteArtist = async (songId) => {
+        try {
+            await api.delete(`/songs/deleteSong/${songId}`)
+            setSongs((prev) => prev.filter((song) => song._id !== songId));
+            toast.success("Song deleted successfully");
+        } catch (err) {
+            toast.error("Error deleting artist");
+            console.error(err);
+        }
+    }
+
     const totalPages = Math.ceil(songs.length / USERS_PER_PAGE);
     const startIndex = (currentPage - 1) * USERS_PER_PAGE;
     const paginatedSongs = songs.slice(startIndex, startIndex + USERS_PER_PAGE);
@@ -67,6 +80,7 @@ const Songs = () => {
                     <th className="border border-[#696969] p-2">Duration</th>
                     <th className="border border-[#696969] p-2">Play Count</th>
                     <th className="border border-[#696969] p-2">Genre</th>
+                    <th className="border border-[#696969] p-2">Action</th>
                 </tr>
                 {paginatedSongs.map(song => (
                     <tr key={song._id} className="border-b border-[#191919]">
@@ -77,8 +91,10 @@ const Songs = () => {
                             {song.title}
                         </td>
                         <td className="p-2 border border-[#191919]">
-                            {song.artist.map(a => (
-                                <span key={a._id}>{a.name}</span>
+                            {song.artist.map((a, i) => (
+                                <span key={a._id}>
+                                    {a.name}{i < song.artist.length - 1 ? ', ' : ''}
+                                </span>
                             ))}
                         </td>
                         <td className="p-2 border w-30 border-[#191919]">
@@ -97,6 +113,14 @@ const Songs = () => {
                         </td>
                         <td className="p-2 border border-[#191919]">
                             {song.genre?.name || "Unknown"}
+                        </td>
+                        <td className='flex gap-2 justify-center items-center'>
+                            <button onClick={() => navigate(`/admin/editSong/${song._id}`)} className='p-2 mt-3 rounded bg-blue-500'>
+                                Edit
+                            </button>
+                            <button onClick={() => handleDeleteArtist(song._id)} className='p-2 mt-3 rounded bg-red-600'>
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 ))}

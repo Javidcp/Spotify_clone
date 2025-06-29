@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
 const GenrePlaylistCreator = () => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm();
 
   const [existPlaylist, setExistPlaylist] = useState([])
 
@@ -101,11 +101,16 @@ const onSubmit = async (data) => {
         />
 
         <button
-          type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md"
-        >
-          Create Playlist
-        </button>
+                type="submit"
+                disabled={isSubmitting}
+                className={`p-3 mt-2 font-mono rounded-lg w-full ${
+                    isSubmitting
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-green-400 text-black hover:bg-green-300"
+                }`}
+            >
+            {isSubmitting ? "Creating..." : "Create Playlist"}
+            </button>
       </form>
 
       <div className="mt-6">

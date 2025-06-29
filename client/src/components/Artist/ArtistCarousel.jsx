@@ -1,6 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../../utils/axios';
+import { toast } from 'react-toastify';
 
 const SpotifyArtistCarousel = () => {
     const scrollRef = useRef(null);
@@ -8,43 +10,21 @@ const SpotifyArtistCarousel = () => {
     const [showRightArrow, setShowRightArrow] = useState(true);
     const navigate = useNavigate()
 
-    const artists = [
-        {
-        id: 1,
-        name: "Taylor Swift",
-        image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 2,
-        name: "The Weeknd",
-        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 4,
-        name: "Drake",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 5,
-        name: "Billie Eilish",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 6,
-        name: "Ed Sheeran",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 7,
-        name: "Dua Lipa",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
-        },
-        {
-        id: 8,
-        name: "Post Malone",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-        }
-    ];
+    const [artists, setArtist] = useState([])
+
+    useEffect(() => {
+    const handleArtists = async () => {
+      try {
+          const res = await api.get('/artist')
+          setArtist(res.data)
+          console.log(res.data);
+          
+      } catch (err) {
+        toast.error("Error in fetching Playlist:", err)
+      }
+    }
+    handleArtists()
+  }, [])
 
     const scroll = (direction) => {
         const container = scrollRef.current;
@@ -114,8 +94,8 @@ const SpotifyArtistCarousel = () => {
             >
                 {artists.map((artist) => (
                 <Link
-                    to='/artistperson'
-                    key={artist.id}
+                    to={`/artist/${artist._id}`}
+                    key={artist._id}
                     className="flex-shrink-0 w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card"
                 >
                     <div className="relative mb-4">

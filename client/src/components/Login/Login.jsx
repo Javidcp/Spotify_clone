@@ -63,7 +63,7 @@ const Login = () => {
             setLoading(false)
         }
     }
-    console.log(password);
+    
     
 
     const verifyOtp = async () => {

@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
 import api from "../utils/axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const AddSong = () => {
     const {
@@ -15,6 +16,7 @@ const AddSong = () => {
 
     const [artists, setArtists] = useState([]);
     const [genres, setGenres] = useState([]);
+    const navigate = useNavigate()
 
 
     useEffect(() => {
@@ -67,6 +69,7 @@ const AddSong = () => {
             },
         });
         toast.success("Song added!");
+        navigate('/admin/songs')
         reset();
         } catch (err) {
         console.error(err);

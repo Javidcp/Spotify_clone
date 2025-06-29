@@ -46,7 +46,17 @@ exports.getGenres = errorHandling(async (req, res) => {
 
 
 exports.getGenrePlaylist = errorHandling( async (req, res, next) => {
-    const genre = await GenrePlaylist.findById(req.params.id).populate({path: 'songs', populate: { path: 'artist', model: 'Artist'}})
+    const genre = await GenrePlaylist.findById(req.params.id).populate({path: 'songs', populate: [{ path: 'artist', model: 'Artist'}, { path: 'genre', model: 'GenrePlaylist' }]})
     if (!genre) return next(createError(404, "Genre not found"))
     res.json(genre);
+})
+
+
+
+exports.deleteGenre = errorHandling(async (req, res, next) => {
+    const { genreId } = req.params;
+
+    const genre = await GenrePlaylist.findByIdAndDelete( genreId )
+    if (!genre) return next(createError(404, "Artist not found"))
+    res.status(200).json(genre)
 })

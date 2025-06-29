@@ -2,160 +2,300 @@ import { useEffect, useRef } from 'react';
 import { usePlayer } from '../hooks/redux';
 
 const GlobalAudioManager = () => {
-    const audioRef = useRef(null);
-    const videoRef = useRef(null);
+  const audioRef = useRef(null);
+  const videoRef = useRef(null);
+  const {
+    currentTrack,
+    isPlaying,
+    volume,
+    isMuted,
+    skipNext,
+    updateCurrentTime,
+    updateDuration,
+    setPlayerLoading,
+    setPlayerError,
+    registerAudioRef,
+    registerVideoRef,
+  } = usePlayer();
+
+  useEffect(() => {
+    console.log('【DEBUG】 currentTrack ID:', currentTrack?.id);
+  }, [currentTrack]);
+
+useEffect(() => {
+  registerAudioRef(audioRef.current);
+}, []); // Only once, on mount
+
+useEffect(() => {
+  registerVideoRef(videoRef.current);
+}, []);
+
+
+useEffect(() => {
+  if (videoRef.current) registerVideoRef(videoRef.current);
+}, [videoRef.current]);
+
+
+  useEffect(() => {
+    if (!currentTrack) {
+      console.log('No current track to load');
+      return;
+    }
+
+    console.log('Loading new track:', currentTrack);
     
-    const {
-        currentSong,
-        isPlaying,
-        volume,
-        isMuted,
-        skipNext,
-        updateCurrentTime,
-        updateDuration,
-        setPlayerLoading,
-        setPlayerError,
-        registerAudioRef,
-        registerVideoRef,
-    } = usePlayer();
+    if (setPlayerLoading) {
+      setPlayerLoading(true);
+    }
 
-    useEffect(() => {
-        registerAudioRef(audioRef.current);
-        registerVideoRef(videoRef.current);
-    }, [registerAudioRef, registerVideoRef]);
+    const audio = audioRef.current;
+    const video = videoRef.current;
 
-    useEffect(() => {
-        if (currentSong && audioRef.current) {
-        setPlayerLoading(true);
-        audioRef.current.src = currentSong.audioUrl;
-        audioRef.current.load();
+    if (audio) {
+      const audioUrl = currentTrack.audioUrl || 
+                      currentTrack.url || 
+                      currentTrack.src || 
+                      currentTrack.audio ||
+                      currentTrack.file;
+      
+      if (!audioUrl) {
+        console.error('No audio URL found for track:', currentTrack);
+        console.log('Available properties:', Object.keys(currentTrack));
+        if (setPlayerError) {
+          setPlayerError('No audio URL available for this track');
+        }
+        if (setPlayerLoading) {
+          setPlayerLoading(false);
+        }
+        return;
+      }
+
+      console.log('Setting audio source to:', audioUrl);
+
+      if (audio.src !== audioUrl) {
+        audio.src = audioUrl;
         
-        if (isPlaying) {
-            audioRef.current.play()
+        const handleLoadError = () => {
+          console.error('Failed to load audio source:', audioUrl);
+          if (setPlayerError) {
+            setPlayerError('Failed to load audio file');
+          }
+          if (setPlayerLoading) {
+            setPlayerLoading(false);
+          }
+        };
+
+        audio.addEventListener('error', handleLoadError, { once: true });
+        audio.load();
+      }
+
+      if (isPlaying) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
             .then(() => {
-                setPlayerLoading(false);
-                setPlayerError(null);
+              console.log('Audio playback started successfully');
+              if (setPlayerLoading) setPlayerLoading(false);
+              if (setPlayerError) setPlayerError(null);
             })
-            .catch(error => {
-                console.error('Audio playback error:', error);
-                setPlayerError(error.message);
-                setPlayerLoading(false);
+            .catch((err) => {
+              console.error('Audio playback error:', err);
+              if (setPlayerError) setPlayerError(err.message);
+              if (setPlayerLoading) setPlayerLoading(false);
             });
         }
-        }
+      } else {
+        if (setPlayerLoading) setPlayerLoading(false);
+      }
+    }
 
-        if (currentSong && videoRef.current && currentSong.video) {
-        videoRef.current.src = currentSong.video;
-        videoRef.current.load();
+    if (video && (currentTrack.video || currentTrack.videoUrl)) {
+      const videoUrl = currentTrack.video || currentTrack.videoUrl;
+      
+      if (videoUrl && video.src !== videoUrl) {
+        console.log('Setting video source to:', videoUrl);
+        video.src = videoUrl;
+        video.load();
         
         if (isPlaying) {
-            videoRef.current.play().catch(error => {
-            console.error('Video playback error:', error);
-            });
+          video.play().catch((err) => {
+            console.error('Video playback error:', err);
+          });
         }
-        }
-    }, [currentSong, setPlayerLoading, setPlayerError]);
+      }
+    } else if (video && video.src) {
+      video.src = '';
+      video.load();
+    }
+  }, [currentTrack, isPlaying, setPlayerLoading, setPlayerError]);
 
-    useEffect(() => {
-        if (audioRef.current) {
-        if (isPlaying) {
-            audioRef.current.play().catch(error => {
-            console.error('Audio play error:', error);
-            setPlayerError(error.message);
-            });
-        } else {
-            audioRef.current.pause();
-        }
-        }
+  useEffect(() => {
+    const audio = audioRef.current;
+    const video = videoRef.current;
 
-        if (videoRef.current) {
-        if (isPlaying) {
-            videoRef.current.play().catch(error => {
-            console.error('Video play error:', error);
-            });
-        } else {
-            videoRef.current.pause();
-        }
-        }
-    }, [isPlaying, setPlayerError]);
+    console.log('Play/pause state changed:', isPlaying);
 
-    useEffect(() => {
-        if (audioRef.current) {
-        audioRef.current.volume = isMuted ? 0 : volume;
+    if (audio && currentTrack) {
+      if (isPlaying) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.error('Audio resume error:', err);
+            if (setPlayerError) setPlayerError(err.message);
+          });
         }
-        if (videoRef.current) {
-        videoRef.current.volume = isMuted ? 0 : volume;
-        }
-    }, [volume, isMuted]);
+      } else {
+        audio.pause();
+      }
+    }
 
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
+    if (video && (currentTrack?.video || currentTrack?.videoUrl)) {
+      if (isPlaying) {
+        video.play().catch((err) => {
+          console.error('Video resume error:', err);
+        });
+      } else {
+        video.pause();
+      }
+    }
+  }, [isPlaying, currentTrack, setPlayerError]);
 
-        const handleTimeUpdate = () => {
+  useEffect(() => {
+    const audio = audioRef.current;
+    const video = videoRef.current;
+
+    const effectiveVolume = isMuted ? 0 : volume ?? 1;
+
+
+    if (audio) {
+      audio.volume = effectiveVolume;
+    }
+    if (video) {
+      video.volume = effectiveVolume;
+    }
+  }, [volume, isMuted]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      if (updateCurrentTime) {
         updateCurrentTime(audio.currentTime);
-        };
+      }
+    };
 
-        const handleLoadedMetadata = () => {
+    const handleLoadedMetadata = () => {
+      console.log('Audio metadata loaded, duration:', audio.duration);
+      if (updateDuration) {
         updateDuration(audio.duration);
-        };
+      }
+    };
 
-        const handleEnded = () => {
+    const handleEnded = () => {
+      console.log('Audio track ended, skipping to next');
+      if (skipNext) {
         skipNext();
-        };
+      }
+    };
 
-        const handleError = (e) => {
-        console.error('Audio error:', e);
-        setPlayerError('Failed to load audio');
+    const handleError = (e) => {
+      console.error('Audio error:', e, audio.error);
+      let errorMessage = 'Failed to load audio';
+      
+      if (audio.error) {
+        switch (audio.error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Audio loading was aborted';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error while loading audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'Audio decoding error';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported or file not found';
+            break;
+          default:
+            errorMessage = audio.error.message || 'Unknown audio error';
+        }
+      }
+      
+      if (setPlayerError) {
+        setPlayerError(errorMessage);
+      }
+      if (setPlayerLoading) {
         setPlayerLoading(false);
-        };
+      }
+    };
 
-        const handleCanPlay = () => {
+    const handleCanPlay = () => {
+      console.log('Audio can play');
+      if (setPlayerLoading) {
         setPlayerLoading(false);
-        };
+      }
+    };
 
-        const handleWaiting = () => {
+    const handleWaiting = () => {
+      console.log('Audio waiting for data');
+      if (setPlayerLoading) {
         setPlayerLoading(true);
-        };
+      }
+    };
 
-        const handleCanPlayThrough = () => {
+    const handleCanPlayThrough = () => {
+      console.log('Audio can play through');
+      if (setPlayerLoading) {
         setPlayerLoading(false);
-        };
+      }
+    };
 
-        audio.addEventListener('timeupdate', handleTimeUpdate);
-        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-        audio.addEventListener('ended', handleEnded);
-        audio.addEventListener('error', handleError);
-        audio.addEventListener('canplay', handleCanPlay);
-        audio.addEventListener('waiting', handleWaiting);
-        audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    const handleLoadStart = () => {
+      console.log('Audio load started');
+      if (setPlayerLoading) {
+        setPlayerLoading(true);
+      }
+    };
 
-        return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError);
-        audio.removeEventListener('canplay', handleCanPlay);
-        audio.removeEventListener('waiting', handleWaiting);
-        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
-        };
-    }, [skipNext, updateCurrentTime, updateDuration, setPlayerError, setPlayerLoading]);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    audio.addEventListener('loadstart', handleLoadStart);
 
-    return (
-        <>
-        <audio
-            ref={audioRef}
-            preload="metadata"
-            style={{ display: 'none' }}
-        />
-        <video
-            ref={videoRef}
-            preload="metadata"
-            style={{ display: 'none' }}
-            muted={true}
-        />
-        </>
-    );
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+      audio.removeEventListener('loadstart', handleLoadStart);
+    };
+  }, [skipNext, updateCurrentTime, updateDuration, setPlayerError, setPlayerLoading]);
+
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        preload="metadata"
+        style={{ display: 'none' }}
+        crossOrigin="anonymous"
+      />
+      <video
+        ref={videoRef}
+        preload="metadata"
+        style={{ display: 'none' }}
+        muted={isMuted}
+        crossOrigin="anonymous"
+      />
+    </>
+  );
 };
 
 export default GlobalAudioManager;

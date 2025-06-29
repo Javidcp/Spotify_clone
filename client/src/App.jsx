@@ -39,6 +39,7 @@ import AuthProtected from './components/Auth/AuthProtected';
 import EditArtist from './admin/EditArtist';
 import GenrePlaylistForm from './admin/GenrePlaylistForm';
 import GenreInside from './admin/GenreInside';
+import EditSong from './admin/EditSong';
 
 
 
@@ -52,9 +53,9 @@ const router = createHashRouter([
     { path: '/download', element: <Download /> },
     { path: '/notification', element: <Notification /> },
     { path: '/indiabest', element: <IndiaBestAll /> },
-    { path: '/playlist', element: <ProtectedRoute><Inside /></ProtectedRoute> },
+    { path: '/playlist/:playlistId', element: <ProtectedRoute><Inside /></ProtectedRoute> },
     { path: '/artist', element: <SpotifyArtist /> },
-    { path: '/artistperson', element: <ProtectedRoute><ArtistPage /></ProtectedRoute> },
+    { path: '/artist/:artistId', element: <ProtectedRoute><ArtistPage /></ProtectedRoute> },
     {path: '/full', element: <ProtectedRoute><FullSong/></ProtectedRoute>},
     { path: '/liked', element: <ProtectedRoute><LikedSong/></ProtectedRoute> },
     { path: '/createplaylist', element: <ProtectedRoute><CreatePlaylist/></ProtectedRoute> }
@@ -69,6 +70,7 @@ const router = createHashRouter([
     { path: 'users', element: <User/> },
     { path: 'songs', element: <Songs/> },
     { path: 'addSong', element: <AddSong/> },
+    { path: 'editSong/:songId', element: <EditSong /> },
     { path: 'artist', element: <Artist/> },
     { path: 'addArtist', element: <AdminCreateArtist/> },
     { path: 'editArtist/:artistId', element: <EditArtist /> },

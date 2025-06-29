@@ -23,6 +23,8 @@ const GenreInside = () => {
         fetchSongs()
     }, [id])
 
+
+
     const handleTogglePlay = (songUrl, songId) => {
         if (audioRef.current && playingId === songId) {
             if (isPlaying) {
@@ -47,7 +49,7 @@ const GenreInside = () => {
 
     return (
         <div className="p-4 min-h-screen mt-10 text-white grid grid-cols-2 gap-10">
-            <div>
+            <div className='sticky top-20 self-start'>
                 <img src={genre.image} className='rounded' alt="" />
             </div>
             <div>
@@ -56,7 +58,9 @@ const GenreInside = () => {
                     <p className="mb-2">{genre.description}</p>
                 </div>
                     <h2 className='text-xl font-bold mt-8 mb-3'>Song List :</h2>
-                <ul className="space-y-2 p-2">
+                
+
+                    <ul className="space-y-2 p-2">
                     {genre.songs && genre.songs.length === 0 ? (
                         <li>No Song Found</li>
                     ) : (
@@ -76,6 +80,7 @@ const GenreInside = () => {
                         ))
                     )}
                 </ul>
+                
             </div>
         </div>
     )
