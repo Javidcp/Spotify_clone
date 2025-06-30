@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import Select from 'react-select';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
@@ -11,14 +12,41 @@ const EditSong = () => {
     const [previewImage, setPreviewImage] = useState('');
     const [previewAudio, setPreviewAudio] = useState('');
     const [error, setError] = useState('');
+    const [artists, setArtists] = useState([]);
+    const [genres, setGenres] = useState([]);
 
     const {
         register,
         handleSubmit,
         setValue,
+        control,
         formState: { isSubmitting, isValid, isDirty, errors },
         watch,
     } = useForm({ mode: 'onChange' });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [artistRes, genreRes] = await Promise.all([
+                    api.get("/artist"),
+                    api.get("/genreName"),
+                ]);
+
+                const sortedArtists = artistRes.data.sort((a, b) =>
+                    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+                );
+                setArtists(sortedArtists);
+
+                const sortedGenres = genreRes.data.sort((a, b) =>
+                    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+                );
+                setGenres(sortedGenres);
+            } catch (err) {
+                console.error("Failed to fetch artists or genres:", err);
+            }
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const fetchSong = async () => {
@@ -28,8 +56,15 @@ const EditSong = () => {
                 setValue('title', song.title);
                 setValue('duration', song.duration);
                 setValue('playCount', song.playCount);
-                setValue('genre', song.genre?._id || '');
-                setValue('artist', song.artist.map((a) => a._id).join(','));
+                
+                if (song.genre) {
+                    setValue('genre', song.genre.name);
+                }
+                
+                if (song.artist && song.artist.length > 0) {
+                    setValue('artist', { value: song.artist[0]._id, label: song.artist[0].name });
+                }
+                
                 setPreviewImage(song.coverImage);
                 setPreviewAudio(song.url);
             } catch (err) {
@@ -38,25 +73,27 @@ const EditSong = () => {
             }
         };
 
-        fetchSong();
-    }, [songId, setValue, navigate]);
+        if (artists.length > 0 && genres.length > 0) {
+            fetchSong();
+        }
+    }, [songId, setValue, navigate, artists, genres]);
 
     const onSubmit = async (data) => {
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('duration', data.duration);
         formData.append('genre', data.genre);
-        const artistIds = data.artist.split(',').map((id) => id.trim());
-        artistIds.forEach((id) => formData.append('artist', id));
+        formData.append('artist', data.artist.value);
 
         if (data.coverImage?.[0]) {
             formData.append('coverImage', data.coverImage[0]);
         }
 
         if (data.songFile?.[0]) {
-            formData.append('songFile', data.songFile[0]);
+            formData.append('url', data.songFile[0]);
         }
-        console.log(songId)
+
+        console.log('Updating song with ID:', songId);
 
         try {
             const res = await api.put(`/songs/update/${songId}`, formData, {
@@ -87,6 +124,11 @@ const EditSong = () => {
         }
     }, [selectedAudio]);
 
+    const artistOptions = artists.map((artist) => ({
+        value: artist._id,
+        label: artist.name,
+    }));
+
     return (
         <div className="text-white flex justify-center min-h-screen items-center">
             <form
@@ -96,7 +138,6 @@ const EditSong = () => {
             >
                 <h2 className="text-lg font-semibold mb-4 text-center">Edit Song</h2>
 
-                {/* Title */}
                 <label className="text-xs">Title:</label>
                 <input
                     type="text"
@@ -108,7 +149,6 @@ const EditSong = () => {
                 />
                 {errors.title && <p className="text-red-400 text-xs mb-2">{errors.title.message}</p>}
 
-                {/* Duration */}
                 <label className="text-xs">Duration:</label>
                 <input
                     type="text"
@@ -116,35 +156,73 @@ const EditSong = () => {
                     className={`placeholder:text-[#696969] rounded-md border p-2 w-full mb-1 ${
                         errors.duration ? 'border-red-500' : 'border-[#696969]'
                     }`}
-                    {...register('duration', { required: 'Duration is required' })}
+                    {...register('duration', { 
+                        required: 'Duration is required',
+                        pattern: {
+                            value: /^[0-9]{1,2}:[0-5][0-9]$/,
+                            message: "Duration format should be m:ss or mm:ss",
+                        }
+                    })}
                 />
                 {errors.duration && <p className="text-red-400 text-xs mb-2">{errors.duration.message}</p>}
 
-                {/* Genre */}
-                <label className="text-xs">Genre ID:</label>
-                <input
-                    type="text"
-                    placeholder="Genre ID"
-                    className={`placeholder:text-[#696969] rounded-md border p-2 w-full mb-1 ${
-                        errors.genre ? 'border-red-500' : 'border-[#696969]'
-                    }`}
-                    {...register('genre', { required: 'Genre is required' })}
-                />
-                {errors.genre && <p className="text-red-400 text-xs mb-2">{errors.genre.message}</p>}
-
-                {/* Artist */}
-                <label className="text-xs">Artist IDs (comma separated):</label>
-                <input
-                    type="text"
-                    placeholder="e.g., 123,456"
-                    className={`placeholder:text-[#696969] rounded-md border p-2 w-full mb-1 ${
-                        errors.artist ? 'border-red-500' : 'border-[#696969]'
-                    }`}
-                    {...register('artist', { required: 'Artist ID(s) required' })}
+                <label className="text-xs">Artist:</label>
+                <Controller
+                    name="artist"
+                    control={control}
+                    rules={{ required: "Artist is required" }}
+                    render={({ field }) => (
+                        <Select
+                            {...field}
+                            options={artistOptions}
+                            placeholder="Select Artist"
+                            isClearable
+                            filterOption={(option, inputValue) =>
+                                option.label.toLowerCase().includes(inputValue.toLowerCase())
+                            }
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    backgroundColor: "#1e1e1e",
+                                    borderColor: errors.artist ? "red" : "#696969",
+                                    color: "white",
+                                    marginBottom: "4px"
+                                }),
+                                menu: (provided) => ({
+                                    ...provided,
+                                    backgroundColor: "#121212",
+                                }),
+                                option: (provided, state) => ({
+                                    ...provided,
+                                    backgroundColor: state.isFocused ? "#333" : "#121212",
+                                    color: "white",
+                                }),
+                                singleValue: (provided) => ({
+                                    ...provided,
+                                    color: "white",
+                                }),
+                            }}
+                        />
+                    )}
                 />
                 {errors.artist && <p className="text-red-400 text-xs mb-2">{errors.artist.message}</p>}
 
-                {/* Cover Image */}
+                <label className="text-xs">Genre:</label>
+                <select
+                    {...register("genre", { required: "Genre is required" })}
+                    className={`border p-2 rounded-md w-full mb-1 ${
+                        errors.genre ? "border-red-500" : "border-[#696969]"
+                    } bg-[#1e1e1e]`}
+                >
+                    <option value="">Select Genre</option>
+                    {genres.map((genre) => (
+                        <option key={genre._id} value={genre.name}>
+                            {genre.name}
+                        </option>
+                    ))}
+                </select>
+                {errors.genre && <p className="text-red-400 text-xs mb-2">{errors.genre.message}</p>}
+
                 <label className="text-xs">Cover Image:</label>
                 <input
                     type="file"
@@ -156,7 +234,6 @@ const EditSong = () => {
                     <img src={previewImage} alt="cover" className="w-24 h-24 object-cover rounded mt-2 mx-auto mb-2" />
                 )}
 
-                {/* Audio File */}
                 <label className="text-xs">Audio File:</label>
                 <input
                     type="file"
@@ -168,7 +245,6 @@ const EditSong = () => {
                     <audio controls src={previewAudio} className="w-full mt-2 mb-2" />
                 )}
 
-                {/* Submit */}
                 <button
                     type="submit"
                     disabled={!isDirty || !isValid || isSubmitting}

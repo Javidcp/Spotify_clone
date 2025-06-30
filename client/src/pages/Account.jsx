@@ -4,6 +4,8 @@ import api from "../utils/axios"
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../redux/authSlice';
 import { useNavigate } from "react-router-dom"
+import RecentlyPlayedSection from '../components/RecentlyPlayedSection';
+import { toast } from 'react-toastify';
 
 
 const Account = () => {
@@ -81,17 +83,19 @@ const Account = () => {
             closeModal();
 
             dispatch(setUser(updatedUser));
+            toast.success("Successfully updated")
             localStorage.setItem('user', JSON.stringify(updatedUser));
             navigate('/account')
 
         } catch (error) {
             console.error("Failed to update profile:", error?.response?.data?.message || error.message);
+            toast.error("Error:", error.message)
         }
     };
 
 
     return (
-        <div className="min-h-screen relative">
+        <div className=" relative">
         <div className={`transition-all duration-300 ${isOpen ? 'blur-sm scale-95' : ''}`}>
             <div className='w-full flex items-end bg-[#121212] rounded-md overflow-hidden p-5 text-white gap-5'>
             <div>
@@ -187,6 +191,7 @@ const Account = () => {
             </div>
             </div>
         )}
+        <RecentlyPlayedSection/>
         </div>
     );
 };

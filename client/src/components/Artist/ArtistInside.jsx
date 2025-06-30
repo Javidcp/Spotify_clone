@@ -4,6 +4,8 @@ import { usePlayer } from "../../hooks/redux";
 import api from "../../utils/axios";
 import { Play, Pause, MoreHorizontal, Clock } from "lucide-react";
 import BottomPlayer from "../Player";
+import { useDispatch } from "react-redux";
+import { addRecentlyPlayedArtist  } from "../../redux/recentlyPlayedPlaylistsSlice";
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen }) => (
     <div
@@ -79,6 +81,7 @@ const ArtistPage = () => {
     const [artistSongs, setArtistSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(null);
+    const dispatch = useDispatch()
 
     const {
         currentTrackId,
@@ -88,8 +91,6 @@ const ArtistPage = () => {
         playTrack,
         playPause,
         switchPlaylist,
-        pausePlayback,
-        clearTrack
     } = usePlayer();
 
     useEffect(() => {
@@ -100,13 +101,10 @@ const ArtistPage = () => {
 
                 const formattedSongs = artistData.songs.map(song => ({
                     ...song,
-                    id: song._id, // Ensure consistent ID usage
+                    id: song._id,
                     audioUrl: song.audioUrl || song.url,
                 }));
                 setArtistSongs(formattedSongs);
-
-                // DON'T automatically switch playlist or pause - let current song continue playing
-                // Only switch playlist when user explicitly plays a song from this artist
 
             } catch (err) {
                 console.error(err);
@@ -115,10 +113,19 @@ const ArtistPage = () => {
             }
         };
         fetchArtistAndSongs();
-    }, [artistId]); // Removed switchPlaylist and pausePlayback dependencies
+    }, [artistId]);
+
+    useEffect(() => {
+        if (artist && artist._id && artist.name) {
+            dispatch(addRecentlyPlayedArtist({
+                id: artist._id,
+                name: artist.name,
+                photo: artist.photo || artist.image || artist.profileImage
+            }));
+        }
+    }, [artist, dispatch]);
 
     const handlePlay = useCallback((song, index) => {
-        // Switch to this artist's playlist when user plays a song
         if (currentPlaylistId !== artistId) {
             switchPlaylist(artistId, artistSongs);
         }
@@ -138,13 +145,11 @@ const ArtistPage = () => {
             onClick={() => {
                 if (!artistSongs.length) return;
 
-                // Switch to this artist's playlist when main play button is clicked
                 if (currentPlaylistId !== artistId) {
                     switchPlaylist(artistId, artistSongs);
                 }
 
                 if (!isArtistPlaylist || !currentTrackId) {
-                    // Use consistent ID format
                     playTrack(artistSongs[0].id, 0);
                 } else {
                     playPause();
@@ -217,7 +222,6 @@ const ArtistPage = () => {
                 </div>
             </div>
 
-            {/* Always show BottomPlayer if there's a current track playing */}
             {currentTrackId && (
                 <BottomPlayer
                     songs={artistSongs}

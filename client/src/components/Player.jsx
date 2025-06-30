@@ -157,14 +157,14 @@ const BottomPlayer = () => {
           />
         </div>
 
-        <button
+        {/* <button
           onClick={() => navigate('/full')}
           className="p-2 text-gray-400 hover:text-white transition-colors"
           title="Expand"
           aria-label="Expand player"
         >
           <Expand size={20} />
-        </button>
+        </button> */}
       </div>
 
       <style>{`

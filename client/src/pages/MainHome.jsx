@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import Footer from './Footer';
 import SongCarousel from '../components/SongCarousal/IndiaBest';
 import SpotifyArtistCarousel from '../components/Artist/ArtistCarousel';
+import RecentlyPlayedSection from '../components/RecentlyPlayedSection';
 
 const MyComponent = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -26,6 +27,7 @@ const MyComponent = () => {
 
   return (
     <div>
+      <RecentlyPlayedSection/>
       <SongCarousel/>
       <SpotifyArtistCarousel/>
     </div>

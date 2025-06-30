@@ -49,32 +49,44 @@ exports.deleteSong = errorHandling(async (req, res, next) => {
 
 
 exports.updateSong = errorHandling(async (req, res, next) => {
-        const { title, duration, playCount, genre } = req.body;
-        let artist = req.body.artist;
+    const { title, duration, playCount, genre } = req.body;
+    let artist = req.body.artist;
 
-        if (!Array.isArray(artist)) {
-            artist = artist?.split(',').map((id) => id.trim()).filter(Boolean);
+    if (!Array.isArray(artist)) {
+        artist = artist?.split(',').map((id) => id.trim()).filter(Boolean);
+    }
+
+    const song = await Song.findById(req.params.id);
+    if (!song) return next(createError(404, 'Song not found'));
+
+    song.title = title || song.title;
+    song.duration = duration || song.duration;
+    song.artist = artist || song.artist;
+
+    if (genre) {
+        const genreDoc = await GenrePlaylist.findOne({ name: genre });
+        if (genreDoc) {
+            song.genre = genreDoc._id;
+        } else {
+            return next(createError(400, 'Genre not found'));
         }
+    }
 
-        const song = await Song.findById(req.params.id);
-        if (!song) return next(createError(404, 'Song not found' ));
+    if (req.files?.coverImage?.[0]) {
+        song.coverImage = `/uploads/${req.files.coverImage[0].filename}`;
+    }
 
-        song.title = title || song.title;
-        song.duration = duration || song.duration;
-        song.genre = genre || song.genre;
-        song.artist = artist || song.artist;
+    if (req.files?.url?.[0]) {
+        song.url = `/uploads/${req.files.url[0].filename}`;
+    }
 
-        if (req.files?.coverImage?.[0]) {
-            song.coverImage = `/uploads/${req.files.coverImage[0].filename}`;
-        }
+    await song.save();
 
-        if (req.files?.songFile?.[0]) {
-            song.url = `/uploads/${req.files.songFile[0].filename}`;
-        }
+    const populatedSong = await Song.findById(song._id)
+        .populate('artist', 'name')
+        .populate('genre', 'name');
 
-        await song.save();
-
-        res.status(200).json(song);
+    res.status(200).json(populatedSong);
 });
 
 

@@ -3,12 +3,16 @@ import { IoIosFolderOpen, IoIosSearch  } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axios";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setCurrentTrack, setIsPlaying } from "../../redux/playerSlice"; // Update path accordingly
+
 
 
 const SearchBar =() => {
     const navigate = useNavigate()
     const [ search, setSearch ] = useState('')
     const [ results, setResult ] = useState([])
+    const dispatch = useDispatch()
 
     useEffect(() => {
         if (search.trim() === "") return setResult([]);
@@ -42,7 +46,7 @@ const SearchBar =() => {
             </div>
             <ul className="z-50 absolute left-0 top-14 text-white font-[400]  w-full bg-[#1d1d1d] rounded-md flex flex-col gap-2 overflow-y-auto">
                 {results.map((item, index) => (
-                    <Link to={item.type === 'artist' && (`/artist/${item._id}`) || item.type === 'genre' && (`/playlist/${item._id}`) } key={index} onClick={() => setSearch('')} className="px-2 flex items-center gap-4 pb-1">
+                    <Link   to={ item.type === 'artist'? `/artist/${item._id}` : item.type === 'genre' ? `/playlist/${item._id}` : item.type === 'song' ? `/song/${item._id}`: '/'} key={index} onClick={() => {setSearch(''); if (item.type === 'song') { dispatch(setCurrentTrack(item)); dispatch(setIsPlaying(true)) }}} className="px-2 flex items-center gap-4 pb-1">
                         <img src={item.image || item.coverImage} className={`w-10 object-cover h-10 ${item.type === 'artist' && ('rounded-full')}`} alt="" />
                         <div>
                             <p>{item.name || item.title}</p>

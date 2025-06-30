@@ -11,7 +11,7 @@ router.post('/add' , upload.fields([
 router.get('/', getAllSongs);
 router.get('/:songId', getSingleSong);
 router.delete('/deleteSong/:songId', deleteSong)
-router.put('/update/:songId', upload.fields([
+router.put('/update/:id', upload.fields([
         { name: 'coverImage', maxCount: 1 },
         { name: 'url', maxCount: 1 }
     ]), updateSong)

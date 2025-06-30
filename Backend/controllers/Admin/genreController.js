@@ -32,7 +32,7 @@ exports.createGenrePlaylist = errorHandling( async (req, res, next) => {
 
 
 exports.getAllGenrePlaylists = errorHandling(async (req, res) => {
-    const playlists = await GenrePlaylist.find().sort({ createdAt: -1 });
+    const playlists = await GenrePlaylist.find({}, "name description image").sort({ createdAt: -1 });
     res.status(200).json({ playlists });
 });
 

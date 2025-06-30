@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import playerReducer from "./playerSlice"
+import recentlyPlayedReducer from './recentlyPlayedPlaylistsSlice';
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         player: playerReducer,
+        recentlyPlayed: recentlyPlayedReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -15,3 +17,4 @@ export const store = configureStore({
         },
     }),
 });
+

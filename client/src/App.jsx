@@ -41,8 +41,12 @@ import GenrePlaylistForm from './admin/GenrePlaylistForm';
 import GenreInside from './admin/GenreInside';
 import EditSong from './admin/EditSong';
 
-
-
+// Import the user-specific actions (remove the old ones)
+import { setCurrentUser as setCurrentUserArtists } from './redux/recentlyPlayedArtistsSlice';
+import { setCurrentUser as setCurrentUserPlaylists } from './redux/recentlyPlayedPlaylistsSlice';
+import { clearUserSession as clearArtistsSession } from './redux/recentlyPlayedArtistsSlice';
+import { clearUserSession as clearPlaylistsSession } from './redux/recentlyPlayedPlaylistsSlice';
+import SingleSong from './components/SingleSong';
 
 const router = createHashRouter([
   { path: '', element: <><RootLayout/> <GlobalAudioManager/> </>, errorElement: <ErrorPage/> , children: [
@@ -52,6 +56,7 @@ const router = createHashRouter([
     { path: '/premium', element: <Premium  /> },
     { path: '/download', element: <Download /> },
     { path: '/notification', element: <Notification /> },
+    { path: '/song/:songId', element: <SingleSong/> },
     { path: '/indiabest', element: <IndiaBestAll /> },
     { path: '/playlist/:playlistId', element: <ProtectedRoute><Inside /></ProtectedRoute> },
     { path: '/artist', element: <SpotifyArtist /> },
@@ -77,53 +82,92 @@ const router = createHashRouter([
     { path: 'genre', element: <GenrePlaylistForm/> },
     { path: 'genre/:id', element: <GenreInside/> }
   ] }
-
 ])
 
+// Fixed App.js - Ensure user is set before navigation
+
 const App = () => {
-
   const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
 
-useEffect(() => {
-  const savedUser = localStorage.getItem('user');
-  if (savedUser) {
-    dispatch(setUser(JSON.parse(savedUser)));
-    dispatch(setAuth(true));
-  }
-
-  const fetchUser = async () => {
-    try {
-      dispatch(setLoading(true));
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) return;
-
-      const res = await api.get("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      dispatch(setUser(res.data));
-      dispatch(setAuth(true));
-      localStorage.setItem('user', JSON.stringify(res.data));
-    } catch (error) {
-      console.error("Auth failed:", error.response?.data?.message);
-      dispatch(setAuth(false));
-      localStorage.removeItem('user');
-    }finally {
-      dispatch(setLoading(false));
+  // Set user context immediately when user data is available
+  useEffect(() => {
+    if (user && user._id) {
+      console.log('Setting user for recently played slices:', user._id);
+      // Set user context for both recently played slices
+      dispatch(setCurrentUserPlaylists(user._id));
+      dispatch(setCurrentUserArtists(user._id));
     }
-  };
+  }, [user, dispatch]);
 
-  fetchUser();
-}, []);
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    
+    // Load saved user first
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        console.log('Loading saved user:', userData);
+        dispatch(setUser(userData));
+        dispatch(setAuth(true));
+        
+        // Set user context for recently played data immediately
+        if (userData._id) {
+          dispatch(setCurrentUserArtists(userData._id));
+          dispatch(setCurrentUserPlaylists(userData._id));
+        }
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('user');
+      }
+    }
 
-const { isLoading } = useSelector((state) => state.auth);
+    const fetchUser = async () => {
+      try {
+        dispatch(setLoading(true));
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) return;
 
-if (isLoading) {
-  return <div className="text-white h-screen flex items-center justify-center">Loading...</div>;
-}
+        const res = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
+        console.log('Fetched user from API:', res.data);
+        dispatch(setUser(res.data));
+        dispatch(setAuth(true));
+        localStorage.setItem('user', JSON.stringify(res.data));
+        
+        // Set user context for recently played data
+        if (res.data._id) {
+          dispatch(setCurrentUserArtists(res.data._id));
+          dispatch(setCurrentUserPlaylists(res.data._id));
+        }
+        
+      } catch (error) {
+        console.error("Auth failed:", error.response?.data?.message);
+        dispatch(setAuth(false));
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+        
+        // Clear user context on auth failure
+        dispatch(clearArtistsSession());
+        dispatch(clearPlaylistsSession());
+        
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
+
+    fetchUser();
+  }, [dispatch]);
+
+  const { isLoading } = useSelector((state) => state.auth);
+
+  if (isLoading) {
+    return <div className="text-white h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className='bg-black'>

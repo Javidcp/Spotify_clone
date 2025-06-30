@@ -6,19 +6,19 @@ import { toast } from "react-toastify";
 const IndiaBestAll = () => {
     const [playlists, setPlaylist] = useState([])
 
-      useEffect(() => {
+    useEffect(() => {
         const handleSongs = async () => {
-          try {
-              const res = await api.get('/genre')
-              setPlaylist(res.data.playlists)
-              console.log(res.data);
-              
-          } catch (err) {
-            toast.error("Error in fetching Playlist:", err)
-          }
+            try {
+                const res = await api.get('/genre')
+                setPlaylist(res.data.playlists)
+                console.log(res.data);
+                
+            } catch (err) {
+                toast.error("Error in fetching Playlist:", err)
+            }
         }
         handleSongs()
-      }, [])
+    }, [])
 
 
 
@@ -38,11 +38,7 @@ const IndiaBestAll = () => {
                             <div className={`aspect-square relative`}>
                                 <img src={playlist.image} alt="" />
 
-                                <div className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0 shadow-lg">
-                                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-black fill-current ml-1">
-                                        <path d="M8 5v14l11-7z"/>
-                                    </svg>
-                                </div>
+                                
                             </div>
                         </div>
 

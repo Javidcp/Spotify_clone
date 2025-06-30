@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { usePlayer } from '../../hooks/redux';
-import useAuth from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 import api from '../../utils/axios';
 
@@ -11,8 +9,6 @@ const SongCarousel = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-  const { playTrack } = usePlayer()
   const [plays, setPlay] = useState([])
 
 
@@ -97,14 +93,8 @@ const SongCarousel = () => {
                     <div className="relative mb-4 overflow-hidden rounded-lg">
                       <div className={`aspect-square relative`}>
                         <img src={play.image} alt="" />
-                        
-                        
 
-                      <button onClick={(e) => {e.preventDefault(); {isAuthenticated && playTrack(play.id)}}} className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0 shadow-lg">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 relative text-black fill-current ml-1">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
-                      </button>
+                        
                       </div>
                     </div>
 

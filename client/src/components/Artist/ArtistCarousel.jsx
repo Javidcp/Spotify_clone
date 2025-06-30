@@ -104,9 +104,6 @@ const SpotifyArtistCarousel = () => {
                         alt={artist.name}
                         className="w-full aspect-square object-cover rounded-full"
                     />
-                    <button className="absolute bottom-2 right-2 bg-green-500 hover:bg-green-400 rounded-full p-3 shadow-lg transition-all duration-200 opacity-0 group-hover/card:opacity-100 transform translate-y-2 group-hover/card:translate-y-0">
-                        <Play size={18} fill="black" className="text-black ml-0.5" />
-                    </button>
                     </div>
                     
                     <div className="">

@@ -12,6 +12,7 @@ import { Bell } from 'lucide-react';
 
 
 
+
 const Navbar = () => {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +25,7 @@ const Navbar = () => {
     const handleLogout = () => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
+
         dispatch(logout());
         navigate("/");
     };

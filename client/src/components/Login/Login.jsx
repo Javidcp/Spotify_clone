@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Logo from "../../assets/spotify_icon-white.png"
 import { GoogleLogin } from '@react-oauth/google';
 import { useState, useEffect } from "react";
@@ -112,6 +113,8 @@ const Login = () => {
                 email: data.email,
                 password: data.password,
             });
+
+            
 
             localStorage.setItem("accessToken", res.data.token);
             dispatch(setUser(res.data.user));

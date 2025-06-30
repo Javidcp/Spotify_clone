@@ -16,6 +16,7 @@ const Artist = () => {
             try{
                 const res = await api.get('/artist')
                 setArtists(res.data)
+                
             } catch (err) {
                 console.error("Error in fetching songs:", err)
             }
@@ -66,7 +67,7 @@ const Artist = () => {
                 {paginatedArtists.map(artist => (
                     <tr key={artist._id} className="border-b border-[#191919]">
                         <td className="p-2 border border-[#191919]">
-                            <img src={artist.image} className='w-8' alt="" />
+                            <img src={artist.image} className='w-8 h-8 object-cover' alt="" />
                         </td>
                         <td className="p-2 border border-[#191919]">
                             {artist.name}
