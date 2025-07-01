@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, Pause, Plus, MoreHorizontal, Menu, LayoutList, List, Clock } from 'lucide-react';
@@ -43,7 +44,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
     }, [setDropdownOpen, dropdownOpen, song.id]);
 
     const handleDropdownItemClick = useCallback((item) => {
-        console.log('Clicked:', item.label);
+        // console.log('Clicked:', item.label);
         setDropdownOpen(null);
     }, [setDropdownOpen]);
 
@@ -253,13 +254,13 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                 description: genrePlaylist.description || ''
             };
             
-            console.log('Adding playlist to recently played:', playlistData);
+            // console.log('Adding playlist to recently played:', playlistData);
             dispatch(addRecentlyPlayedPlaylist(playlistData));
             } else {
-            console.log('Missing required playlist data - ID or Name');
+            // console.log('Missing required playlist data - ID or Name');
             }
         } else {
-            console.log('Skipping recently played - User ID:', currentUserId, 'Playlist:', !!genrePlaylist);
+            // console.log('Skipping recently played - User ID:', currentUserId, 'Playlist:', !!genrePlaylist);
         }
     }, [currentUserId, genrePlaylist, dispatch]);
 
@@ -277,7 +278,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                     description: genrePlaylist.description || ''
                     };
                     
-                    console.log('Delayed add to recently played:', playlistData);
+                    // console.log('Delayed add to recently played:', playlistData);
                     dispatch(addRecentlyPlayedPlaylist(playlistData));
                 }
             }
@@ -294,13 +295,13 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
             if (!playlistId) return;
             
             try {
-                console.log('Fetching playlist:', playlistId);
+                // console.log('Fetching playlist:', playlistId);
                 const result = await dispatch(fetchPlaylistSongs(playlistId));
 
                 if (!isMounted) return;
 
                 if (fetchPlaylistSongs.fulfilled.match(result)) {
-                    console.log('Playlist songs fetched via Redux:', result.payload);
+                    // console.log('Playlist songs fetched via Redux:', result.payload);
                 } else {
                     console.warn('Redux fetch failed, trying direct API call');
 
@@ -308,7 +309,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                     
                     if (!isMounted) return;
                     
-                    console.log('Fetched playlist data directly:', data);
+                    // console.log('Fetched playlist data directly:', data);
                     setGenrePlaylist(data);
 
                     if (data.songs && Array.isArray(data.songs)) {
@@ -319,7 +320,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                             video: song.video || song.videoUrl || null
                         }));
 
-                        console.log('Processed songs:', processedSongs);
+                        // console.log('Processed songs:', processedSongs);
                         dispatch(setSongsForPlaylist({ playlistId, songs: processedSongs }));
                     }
                 }
@@ -454,7 +455,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         if (viewMode === 'List') {
             return (
                 <>
-                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-[-5px] bg-[#121212] text-gray-400 text-sm font-medium border-b border-[#1d1d1d] z-10">
+                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-18 bg-[#121212]  text-gray-400 text-sm font-medium border-b border-[#1d1d1d] z-10">
                         <div className="col-span-1 pl-2">#</div>
                         <div className="col-span-5">Title</div>
                         <div className="col-span-4 hidden sm:block">Album</div>
@@ -493,7 +494,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         } else {
             return (
                 <div className="px-4">
-                    <div className="grid grid-cols-12 gap-4 py-2 border-b border-[#1d1d1d] sticky top-[-5px] bg-[#121212] text-gray-400 text-sm font-medium z-10">
+                    <div className="grid grid-cols-12 gap-4 py-2 border-b border-[#1d1d1d] sticky top-18 bg-[#121212] text-gray-400 text-sm font-medium z-10">
                         <div className="col-span-1 pl-8">#</div>
                         <div className="col-span-3">Title</div>
                         <div className="col-span-3">Artist</div>
@@ -618,7 +619,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                 )}
 
                 <div className="bg-[#121212]">
-                    <div className="flex items-center justify-between p-4 bg-[#141414] sticky top-0 z-20">
+                    <div className="flex items-center justify-between p-4 bg-[#141414] sticky top-[-5px] z-20">
                         <div className="flex items-center space-x-4">
                             {MainPlayButton}
                             {!isScrolled && (
@@ -675,13 +676,6 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                     {SongList}
                 </div>
             </div>
-            
-            {showVideoComponent && (
-                <VideoPlayer 
-                    navigate={navigate}
-                    onClose={() => dispatch(setShowVideoComponent(false))}
-                />
-            )}
             
             {currentTrack && (
                 <BottomPlayer

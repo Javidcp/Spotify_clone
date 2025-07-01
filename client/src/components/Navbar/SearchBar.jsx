@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axios";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { setCurrentTrack, setIsPlaying } from "../../redux/playerSlice"; // Update path accordingly
+import { setCurrentTrack, setIsPlaying } from "../../redux/playerSlice"; 
 
 
 

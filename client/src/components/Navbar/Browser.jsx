@@ -4,16 +4,28 @@ import api from '../../utils/axios';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
+
+const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
+
 const BrowseInterface = () => {
-
-
     const [playlist , setPlaylist] = useState([])
 
     useEffect(() => {
         const handleSongs = async () => {
             try {
                 const res = await api.get('/genre')
-                setPlaylist(res.data.playlists)
+                const colorData = res.data.playlists.map(item => ({
+                    ...item,
+                    bgColor: getRandomColor()
+                }))
+                setPlaylist(colorData)
                 console.log(res.data);
                 
             } catch (err) {
@@ -33,18 +45,13 @@ const BrowseInterface = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {playlist.map((category) => (
-                        <Link to={`/playlist/${category._id}`} key={category._id}  className={`rounded-lg  p-6 h-48 relative overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group`}>
-                        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60" style={{ backgroundImage: `url(${category.image})`, backgroundSize: 'cover', backgroundPosition: 'top' }}></div>
+                        <Link to={`/playlist/${category._id}`} key={category._id}  className={`rounded-lg  p-6 h-40 relative overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105  hover:shadow-2xl group`} style={{ backgroundColor: category.bgColor}}>
                         <div className="relative z-10">
                             <h2 className="text-xl font-bold mb-2 text-white drop-shadow-lg">
                                 {category.name}
                             </h2>
-                            {category.description && (
-                                <p className="text-sm text-white/90 font-medium">
-                                    {category.description}
-                                </p>
-                            )}
                         </div>
+                            <img src={category.image} className='w-30 absolute right-[-30px] rounded-md bottom-[-20px] rotate-45' alt="" />
                         </Link>
                     ))}
                 </div>

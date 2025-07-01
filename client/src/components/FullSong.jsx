@@ -30,7 +30,6 @@ const FullSong = () => {
     const duration = reduxDuration;
     const volume = reduxVolume;
 
-    // Fetch current song data when currentTrackId changes
     useEffect(() => {
         const fetchCurrentSong = async () => {
             if (!currentTrackId) {
@@ -41,7 +40,6 @@ const FullSong = () => {
 
             try {
                 setLoading(true);
-                // Try to get song details from API
                 const { data } = await api.get(`/song/${currentTrackId}`);
                 setCurrentSong({
                     ...data,
@@ -50,7 +48,6 @@ const FullSong = () => {
                 });
             } catch (error) {
                 console.error('Error fetching song:', error);
-                // If API fails, try to get from artist API using currentPlaylistId
                 if (currentPlaylistId) {
                     try {
                         const { data: artistData } = await api.get(`/artist/${currentPlaylistId}`);
@@ -151,7 +148,6 @@ const FullSong = () => {
         }
     }, [isPlaying, currentSong]);
 
-    // Debug logs - remove these after fixing
     console.log('FullSong Debug:', {
         currentTrackId,
         currentTrackIndex,
@@ -160,7 +156,6 @@ const FullSong = () => {
         loading
     });
 
-    // Show loading state
     if (loading) {
         return (
             <div className="w-full h-[1000px] bg-gray-900 flex items-center justify-center">
@@ -169,7 +164,6 @@ const FullSong = () => {
         );
     }
 
-    // Don't render if no current song
     if (!currentSong) {
         return (
             <div className="w-full h-screen bg-gray-900 flex items-center justify-center">

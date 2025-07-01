@@ -15,34 +15,32 @@ const GlobalAudioManager = () => {
     setPlayerLoading,
     setPlayerError,
     registerAudioRef,
-    registerVideoRef,
+    // registerVideoRef,
   } = usePlayer();
 
-  useEffect(() => {
-    console.log('【DEBUG】 currentTrack ID:', currentTrack?.id);
-  }, [currentTrack]);
+
 
 useEffect(() => {
   registerAudioRef(audioRef.current);
-}, []); // Only once, on mount
-
-useEffect(() => {
-  registerVideoRef(videoRef.current);
 }, []);
 
+// useEffect(() => {
+//   registerVideoRef(videoRef.current);
+// }, []);
 
-useEffect(() => {
-  if (videoRef.current) registerVideoRef(videoRef.current);
-}, [videoRef.current]);
+
+// useEffect(() => {
+//   if (videoRef.current) registerVideoRef(videoRef.current);
+// }, [videoRef.current]);
 
 
   useEffect(() => {
     if (!currentTrack) {
-      console.log('No current track to load');
+      // console.log('No current track to load');
       return;
     }
 
-    console.log('Loading new track:', currentTrack);
+    // console.log('Loading new track:', currentTrack);
     
     if (setPlayerLoading) {
       setPlayerLoading(true);
@@ -60,7 +58,7 @@ useEffect(() => {
       
       if (!audioUrl) {
         console.error('No audio URL found for track:', currentTrack);
-        console.log('Available properties:', Object.keys(currentTrack));
+        // console.log('Available properties:', Object.keys(currentTrack));
         if (setPlayerError) {
           setPlayerError('No audio URL available for this track');
         }
@@ -70,7 +68,7 @@ useEffect(() => {
         return;
       }
 
-      console.log('Setting audio source to:', audioUrl);
+      // console.log('Setting audio source to:', audioUrl);
 
       if (audio.src !== audioUrl) {
         audio.src = audioUrl;
@@ -94,7 +92,7 @@ useEffect(() => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('Audio playback started successfully');
+              // console.log('Audio playback started successfully');
               if (setPlayerLoading) setPlayerLoading(false);
               if (setPlayerError) setPlayerError(null);
             })
@@ -113,7 +111,7 @@ useEffect(() => {
       const videoUrl = currentTrack.video || currentTrack.videoUrl;
       
       if (videoUrl && video.src !== videoUrl) {
-        console.log('Setting video source to:', videoUrl);
+        // console.log('Setting video source to:', videoUrl);
         video.src = videoUrl;
         video.load();
         
@@ -133,7 +131,7 @@ useEffect(() => {
     const audio = audioRef.current;
     const video = videoRef.current;
 
-    console.log('Play/pause state changed:', isPlaying);
+    // console.log('Play/pause state changed:', isPlaying);
 
     if (audio && currentTrack) {
       if (isPlaying) {
@@ -186,14 +184,14 @@ useEffect(() => {
     };
 
     const handleLoadedMetadata = () => {
-      console.log('Audio metadata loaded, duration:', audio.duration);
+      // console.log('Audio metadata loaded, duration:', audio.duration);
       if (updateDuration) {
         updateDuration(audio.duration);
       }
     };
 
     const handleEnded = () => {
-      console.log('Audio track ended, skipping to next');
+      // console.log('Audio track ended, skipping to next');
       if (skipNext) {
         skipNext();
       }
@@ -231,28 +229,28 @@ useEffect(() => {
     };
 
     const handleCanPlay = () => {
-      console.log('Audio can play');
+      // console.log('Audio can play');
       if (setPlayerLoading) {
         setPlayerLoading(false);
       }
     };
 
     const handleWaiting = () => {
-      console.log('Audio waiting for data');
+      // console.log('Audio waiting for data');
       if (setPlayerLoading) {
         setPlayerLoading(true);
       }
     };
 
     const handleCanPlayThrough = () => {
-      console.log('Audio can play through');
+      // console.log('Audio can play through');
       if (setPlayerLoading) {
         setPlayerLoading(false);
       }
     };
 
     const handleLoadStart = () => {
-      console.log('Audio load started');
+      // console.log('Audio load started');
       if (setPlayerLoading) {
         setPlayerLoading(true);
       }
@@ -283,7 +281,7 @@ useEffect(() => {
     <>
       <audio
         ref={audioRef}
-        preload="metadata"
+        preload="auto"
         style={{ display: 'none' }}
         crossOrigin="anonymous"
       />

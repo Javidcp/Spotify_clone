@@ -1,6 +1,5 @@
 import React from 'react';
 import Logo from "../assets/spotify_icon-white.png"
-import Footer from './Footer';
 
 export default function Premium() {
     const scrollToSection = (id) => {
@@ -139,9 +138,6 @@ export default function Premium() {
                     <img src="https://paymentsdk.spotifycdn.com/svg/providers/upi/paytm.svg" width={50} alt="" />
                 </div>
             </div>
-            <p className="text-sm opacity-60 mb-16">
-            <span className="underline cursor-pointer">+ 6 more</span>
-            </p>
         </div>
 
         <div className='flex justify-center mb-15'>
@@ -313,7 +309,6 @@ export default function Premium() {
             </div>
 
         </div>
-        {/* <Footer/> */}
         </>
     );
 }

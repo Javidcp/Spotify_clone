@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../utils/axios';
+import { useSelector } from 'react-redux';
 
 const SongCarousel = () => {
   const scrollRef = useRef(null);
@@ -10,6 +11,8 @@ const SongCarousel = () => {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const navigate = useNavigate()
   const [plays, setPlay] = useState([])
+  
+    const currentPlaylistId = useSelector((state) => state.player.currentPlaylistId);
 
 
 
@@ -29,20 +32,19 @@ const SongCarousel = () => {
 
 
 
-      const scroll = (direction) => {
-        const container = scrollRef.current;
-        if (!container) return;
+  const scroll = (direction) => {
+    const container = scrollRef.current;
+    if (!container) return
+    const scrollAmount = 320;
+    const newScrollLeft = direction === 'left' 
+    ? container.scrollLeft - scrollAmount 
+    : container.scrollLeft + scrollAmount;
 
-        const scrollAmount = 320;
-        const newScrollLeft = direction === 'left' 
-        ? container.scrollLeft - scrollAmount 
-        : container.scrollLeft + scrollAmount;
-
-        container.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-        });
-    };
+    container.scrollTo({
+    left: newScrollLeft,
+    behavior: 'smooth'
+    });
+  };
 
     const handleScroll = () => {
         const container = scrollRef.current;
@@ -83,32 +85,33 @@ const SongCarousel = () => {
                 className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 "
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {plays.map((play) => (
-                <Link 
-                  key={play.id}
+              {plays.map((play) => {
+                const isCurrentPlaylist = play.id === currentPlaylistId;
+                return (
+                  <Link 
+                  key={play._id}
                   to={`/playlist/${play._id}`}
-                  className="flex-shrink-0 w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card"
+                  className={`flex-shrink-0 w-30 md:w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card `}
                 >
                   <div className="rounded-lg hover:bg-[#1d1d1d]">
                     <div className="relative mb-4 overflow-hidden rounded-lg">
-                      <div className={`aspect-square relative`}>
-                        <img src={play.image} alt="" />
-
-                        
+                      <div className={` md:aspect-square object-cover relative`}>
+                        <img src={play.image} className='aspect-square ' alt="" />
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-white font-semibold mb-1 group-hover/card:text-green-400 transition-colors">
+                      <h4 className={`text-white md:text-xl text-sm font-semibold mb-1 group-hover/card:text-green-400 transition-colors ${isCurrentPlaylist ? 'text-green-500': 'text-white'}`}>
                         {play.name}
                       </h4>
-                      <p className="text-gray-400 text-sm line-clamp-2 leading-tight">
+                      <p className="text-gray-400 text-xs md:text-sm line-clamp-2 leading-tight">
                         {play.description}
                       </p>
                     </div>
                   </div>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

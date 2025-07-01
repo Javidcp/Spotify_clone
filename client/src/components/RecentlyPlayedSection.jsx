@@ -25,7 +25,7 @@ const RecentlyPlayedSection = () => {
       {displayItems.length > 0 ? (
         <div className='p-8'>
           <h2 className="text-2xl font-bold text-white mb-4">Recently Played</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {displayItems.map(item => (
               <div 
                 key={`${item.type}_${item.id}`} 

@@ -114,8 +114,6 @@ const Login = () => {
                 password: data.password,
             });
 
-            
-
             localStorage.setItem("accessToken", res.data.token);
             dispatch(setUser(res.data.user));
             dispatch(setAuth(true));

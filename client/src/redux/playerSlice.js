@@ -1,216 +1,3 @@
-// // playerSlice.js - Corrected version
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import api from '../utils/axios';
-
-// export const fetchPlaylistSongs = createAsyncThunk(
-//   'player/fetchPlaylistSongs',
-//   async (playlistId) => {
-//     const response = await api.get(`/genre-playlists/${playlistId}`);
-//     return { playlistId, songs: response.data.songs };
-//   }
-// );
-
-// const initialState = {
-//   playlists: {},
-//   currentPlaylistId: null,
-//   currentTrackId: null,
-//   currentTrackIndex: null,
-//   isPlaying: false,
-//   showVideoComponent: false,
-//   currentTime: 0,
-//   duration: 0,
-//   volume: 1,
-//   isMuted: false,
-//   isLoading: false,
-//   error: null,
-//   audioRef: null,
-//   videoRef: null,
-// };
-
-// const playerSlice = createSlice({
-//   name: 'player',
-//   initialState,
-//   reducers: {
-//     setCurrentPlaylist: (state, action) => {
-//       state.currentPlaylistId = action.payload;
-//       state.currentTrackId = null;
-//       state.currentTrackIndex = null;
-//     },
-//     setCurrentTrack: (state, action) => {
-//       const { trackId, trackIndex } = action.payload;
-//       state.currentTrackId = trackId;
-//       state.currentTrackIndex = trackIndex;
-//     },
-//     setIsPlaying: (state, action) => {
-//       state.isPlaying = action.payload;
-//     },
-//     togglePlay: (state) => {
-//       state.isPlaying = !state.isPlaying;
-//     },
-//     setShowVideoComponent: (state, action) => {
-//       state.showVideoComponent = action.payload;
-//     },
-//     setCurrentTime: (state, action) => {
-//       state.currentTime = action.payload;
-//     },
-//     setDuration: (state, action) => {
-//       state.duration = action.payload;
-//     },
-//     setVolume: (state, action) => {
-//       state.volume = action.payload;
-//     },
-//     toggleMute: (state) => {
-//       state.isMuted = !state.isMuted;
-//     },
-//     setLoading: (state, action) => {
-//       state.isLoading = action.payload;
-//     },
-//     setError: (state, action) => {
-//       state.error = action.payload;
-//     },
-//     nextTrack: (state) => {
-//       if (
-//         state.currentPlaylistId &&
-//         state.currentTrackIndex !== null &&
-//         state.playlists[state.currentPlaylistId] &&
-//         state.playlists[state.currentPlaylistId].songs.length > 0
-//       ) {
-//         const songs = state.playlists[state.currentPlaylistId].songs;
-//         const nextIndex = (state.currentTrackIndex + 1) % songs.length;
-//         const nextSong = songs[nextIndex];
-//         state.currentTrackIndex = nextIndex;
-//         state.currentTrackId = nextSong.id;
-//       }
-//     },
-//     previousTrack: (state) => {
-//       if (
-//         state.currentPlaylistId &&
-//         state.currentTrackIndex !== null &&
-//         state.playlists[state.currentPlaylistId] &&
-//         state.playlists[state.currentPlaylistId].songs.length > 0
-//       ) {
-//         const songs = state.playlists[state.currentPlaylistId].songs;
-//         const prevIndex = (state.currentTrackIndex - 1 + songs.length) % songs.length;
-//         const prevSong = songs[prevIndex];
-//         state.currentTrackIndex = prevIndex;
-//         state.currentTrackId = prevSong.id;
-//       }
-//     },
-//     setAudioRef: (state, action) => {
-//       state.audioRef = action.payload;
-//     },
-//     setVideoRef: (state, action) => {
-//       state.videoRef = action.payload;
-//     },
-//     resetPlayer: (state) => {
-//       state.currentTrackId = null;
-//       state.currentTrackIndex = null;
-//       state.isPlaying = false;
-//       state.currentTime = 0;
-//       state.duration = 0;
-//       state.error = null;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(fetchPlaylistSongs.pending, (state, action) => {
-//         const playlistId = action.meta.arg;
-//         if (!state.playlists[playlistId]) {
-//           state.playlists[playlistId] = { songs: [], isLoading: true, error: null };
-//         } else {
-//           state.playlists[playlistId].isLoading = true;
-//           state.playlists[playlistId].error = null;
-//         }
-//       })
-//       .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
-//         const { playlistId, songs } = action.payload;
-//         state.playlists[playlistId] = { songs, isLoading: false, error: null };
-//       })
-//       .addCase(fetchPlaylistSongs.rejected, (state, action) => {
-//         const playlistId = action.meta.arg;
-//         if (!state.playlists[playlistId]) {
-//           state.playlists[playlistId] = { songs: [], isLoading: false, error: action.error.message };
-//         } else {
-//           state.playlists[playlistId].isLoading = false;
-//           state.playlists[playlistId].error = action.error.message;
-//         }
-//       });
-//   },
-// });
-
-// // Actions
-// export const {
-//   setCurrentPlaylist,
-//   setCurrentTrack,
-//   setIsPlaying,
-//   togglePlay,
-//   setShowVideoComponent,
-//   setCurrentTime,
-//   setDuration,
-//   setVolume,
-//   toggleMute,
-//   setLoading,
-//   setError,
-//   nextTrack,
-//   previousTrack,
-//   setAudioRef,
-//   setVideoRef,
-//   resetPlayer,
-// } = playerSlice.actions;
-
-// // Selectors - Fixed naming
-// export const selectCurrentPlaylistId = (state) => state.player.currentPlaylistId;
-// export const selectCurrentTrackId = (state) => state.player.currentTrackId;
-// export const selectCurrentTrackIndex = (state) => state.player.currentTrackIndex;
-// export const selectIsPlaying = (state) => state.player.isPlaying;
-
-// export const selectSongsForCurrentPlaylist = (state) => {
-//   const playlistId = state.player.currentPlaylistId;
-//   if (!playlistId || !state.player.playlists[playlistId]) return [];
-//   return state.player.playlists[playlistId].songs;
-// };
-
-// export const selectIsLoadingForCurrentPlaylist = (state) => {
-//   const playlistId = state.player.currentPlaylistId;
-//   return playlistId && state.player.playlists[playlistId]
-//     ? state.player.playlists[playlistId].isLoading
-//     : false;
-// };
-
-// export const selectErrorForCurrentPlaylist = (state) => {
-//   const playlistId = state.player.currentPlaylistId;
-//   return playlistId && state.player.playlists[playlistId]
-//     ? state.player.playlists[playlistId].error
-//     : null;
-// };
-
-// export const selectCurrentTrack = (state) => {
-//   const playlistId = state.player.currentPlaylistId;
-//   const trackId = state.player.currentTrackId;
-//   if (!playlistId || !trackId) return null;
-//   const playlist = state.player.playlists[playlistId];
-//   if (!playlist) return null;
-//   return playlist.songs.find(song => song.id === trackId) || null;
-// };
-
-// export const selectPlayerUIState = (state) => ({
-//   showVideoComponent: state.player.showVideoComponent,
-//   currentTime: state.player.currentTime,
-//   duration: state.player.duration,
-//   volume: state.player.volume,
-//   isMuted: state.player.isMuted,
-//   isLoading: state.player.isLoading,
-//   error: state.player.error,
-//   audioRef: state.player.audioRef,
-//   videoRef: state.player.videoRef,
-// });
-
-// export default playerSlice.reducer;
-
-
-
-
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/axios';
 
@@ -246,25 +33,13 @@ const initialState = {
   hasTrackLoaded: false,
   audioRef: null,
   selectedPlaylistId: null,
+  isShuffling: false,
 };
 
 const playerSlice = createSlice({
   name: 'player',
   initialState,
   reducers: {
-//     setCurrentPlaylist: (state, action) => {
-//       const playlistId = action.payload;
-//       // When a new playlist is set, reset the current track
-// state.currentPlaylistId = playlistId;
-//     },
-    
-//     setSongsForPlaylist: (state, action) => {
-//       const { playlistId, songs } = action.payload;
-//       if (!state.playlists[playlistId]) {
-//         state.playlists[playlistId] = { songs: [], isLoading: false, error: null };
-//       }
-//       state.playlists[playlistId].songs = songs;
-//     },
     setSongsForPlaylist(state, action) {
       const { playlistId, songs } = action.payload;
       state.playlists[playlistId] = songs;
@@ -273,12 +48,11 @@ const playerSlice = createSlice({
       state.currentPlaylistId = action.payload;
     },
     setSelectedPlaylist: (state, action) => {
-  state.selectedPlaylistId = action.payload;
-},
-
-
-    // Compatibility action for components that expect setSongs
-    // This sets songs for the current playlist
+    state.selectedPlaylistId = action.payload;
+  },
+  toggleShuffle: (state) => {
+    state.isShuffling = !state.isShuffling;
+  },
     setSongs: (state, action) => {
       const songs = action.payload;
       const playlistId = state.currentPlaylistId;
@@ -289,62 +63,48 @@ const playerSlice = createSlice({
         }
         state.playlists[playlistId].songs = songs;
       }
-      // If no current playlist, we could create a default one or just ignore
-      // For now, let's ignore if no current playlist is set
     },
-
-setCurrentTrack: (state, action) => {
-  state.currentTrackId = action.payload.trackId;
-  state.currentTrackIndex = action.payload.trackIndex;
-},
-setShouldAutoPlay: (state, action) => {
-  state.shouldAutoPlay = action.payload;
-},
-
+  setCurrentTrack: (state, action) => {
+    state.currentTrackId = action.payload.trackId;
+    state.currentTrackIndex = action.payload.trackIndex;
+  },
+  setShouldAutoPlay: (state, action) => {
+    state.shouldAutoPlay = action.payload;
+  },
     setIsPlaying: (state, action) => {
       state.isPlaying = action.payload;
     },
         setAudioRef: (state, action) => {
       state.audioRef = action.payload;
     },
-
     togglePlay: (state) => {
       state.isPlaying = !state.isPlaying;
     },
-
     setShowVideoComponent: (state, action) => {
       state.showVideoComponent = action.payload;
     },
-
     setCurrentTime: (state, action) => {
       state.currentTime = action.payload;
     },
-
     setDuration: (state, action) => {
       const duration = Number(action.payload);
   state.duration = isNaN(duration) || duration < 0 ? 0 : duration;
     },
-
     setVolume: (state, action) => {
       state.volume = Math.max(0, Math.min(1, action.payload));
     },
-
     toggleMute: (state) => {
       state.isMuted = !state.isMuted;
     },
-
     setMuted: (state, action) => {
       state.isMuted = action.payload;
     },
-
     setLoading: (state, action) => {
       state.isLoading = action.payload;
     },
-
     setError: (state, action) => {
       state.error = action.payload;
     },
-
     clearError: (state) => {
       state.error = null;
     },
@@ -385,11 +145,9 @@ setShouldAutoPlay: (state, action) => {
         state.currentTime = 0;
         state.duration = 0;
         state.error = null;
-        // Keep isPlaying state - let component decide if it should auto-play
       }
     },
 
-    // New action to play a specific track from the current playlist
     playTrack: (state, action) => {
       const { trackId, trackIndex } = action.payload;
       state.currentTrackId = trackId;
@@ -400,7 +158,6 @@ setShouldAutoPlay: (state, action) => {
       state.error = null;
     },
 
-    // New action to play a track from a specific playlist
     playTrackFromPlaylist: (state, action) => {
       const { playlistId, trackId, trackIndex } = action.payload;
       state.currentPlaylistId = playlistId;
@@ -424,7 +181,6 @@ setShouldAutoPlay: (state, action) => {
       state.isLoading = false;
     },
 
-    // Action to seek to a specific time
     seekTo: (state, action) => {
       state.currentTime = action.payload;
     },
@@ -454,7 +210,6 @@ clearCurrentTrack: (state) => {
       .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
         const { playlistId, songs } = action.payload;
         state.playlists[playlistId] = { songs, isLoading: false, error: null };
-        // If this is the first playlist loaded or current playlist is null, set it as current
         if (!state.currentPlaylistId) {
           state.currentPlaylistId = playlistId;
         }
@@ -489,6 +244,7 @@ export const {
   setMuted,
   setAudioRef,
   setLoading,
+  toggleShuffle,
   setError,
   clearError,
   nextTrack,
@@ -513,23 +269,19 @@ export const selectIsLoading = (state) => state.player.isLoading;
 export const selectError = (state) => state.player.error;
 export const selectShowVideoComponent = (state) => state.player.showVideoComponent;
 
-// Get all playlists
 export const selectAllPlaylists = (state) => state.player.playlists;
 
-// Get songs for current playlist
 export const selectSongsForCurrentPlaylist = (state) => {
   const playlistId = state.player.currentPlaylistId;
   if (!playlistId || !state.player.playlists[playlistId]) return [];
   return state.player.playlists[playlistId].songs;
 };
 
-// Get songs for a specific playlist
 export const selectSongsForPlaylist = (playlistId) => (state) => {
   if (!playlistId || !state.player.playlists[playlistId]) return [];
   return state.player.playlists[playlistId].songs;
 };
 
-// Get loading state for current playlist
 export const selectIsLoadingForCurrentPlaylist = (state) => {
   const playlistId = state.player.currentPlaylistId;
   return playlistId && state.player.playlists[playlistId]
@@ -537,14 +289,12 @@ export const selectIsLoadingForCurrentPlaylist = (state) => {
     : false;
 };
 
-// Get loading state for a specific playlist
 export const selectIsLoadingForPlaylist = (playlistId) => (state) => {
   return playlistId && state.player.playlists[playlistId]
     ? state.player.playlists[playlistId].isLoading
     : false;
 };
 
-// Get error for current playlist
 export const selectErrorForCurrentPlaylist = (state) => {
   const playlistId = state.player.currentPlaylistId;
   return playlistId && state.player.playlists[playlistId]
@@ -560,7 +310,6 @@ export const selectSelectedPlaylistSongs = (state) => {
 };
 
 
-// Get error for a specific playlist
 export const selectErrorForPlaylist = (playlistId) => (state) => {
   return playlistId && state.player.playlists[playlistId]
     ? state.player.playlists[playlistId].error
@@ -594,7 +343,6 @@ export const selectCurrentTrack = (state) => {
 
 
 
-// Get player UI state (useful for components)
 export const selectPlayerUIState = (state) => ({
   showVideoComponent: state.player.showVideoComponent,
   currentTime: state.player.currentTime,
@@ -606,15 +354,12 @@ export const selectPlayerUIState = (state) => ({
   error: state.player.error,
 });
 
-// Get complete player state (useful for debugging)
 export const selectPlayerState = (state) => state.player;
 
-// Check if a playlist exists in store
 export const selectHasPlaylist = (playlistId) => (state) => {
   return Boolean(state.player.playlists[playlistId]);
 };
 
-// Check if there's a next track available
 export const selectHasNextTrack = (state) => {
   const playlistId = state.player.currentPlaylistId;
   const currentIndex = state.player.currentTrackIndex;
@@ -624,7 +369,6 @@ export const selectHasNextTrack = (state) => {
   return currentIndex < playlist.songs.length - 1;
 };
 
-// Check if there's a previous track available
 export const selectHasPreviousTrack = (state) => {
   const playlistId = state.player.currentPlaylistId;
   const currentIndex = state.player.currentTrackIndex;
@@ -632,7 +376,6 @@ export const selectHasPreviousTrack = (state) => {
   return currentIndex > 0;
 };
 
-// Get progress as a percentage (0-100)
 export const selectProgress = (state) => {
   const { currentTime, duration } = state.player;
   if (!duration || duration === 0) return 0;

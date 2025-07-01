@@ -1,5 +1,3 @@
-
-import SideBar from './SideBar'
 import MainHome from './MainHome'
 
 const Home = () => {

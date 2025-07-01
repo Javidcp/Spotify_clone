@@ -27,7 +27,7 @@ exports.getArtist = errorHandling(async (req, res) => {
 
 exports.getSingleArtist = errorHandling( async (req, res, next) => {
     const { artistId } = req.params;
-    const artist = await Artist.findById( artistId ).populate('songs')
+    const artist = await Artist.findById( artistId ).populate({path: 'songs', populate: [{ path: 'artist', model: 'Artist'}, { path: 'genre', model: 'GenrePlaylist' }]})
     if ( !artist ) return next(createError(404, "Artist not found"))
 
     res.status(200).json( artist )

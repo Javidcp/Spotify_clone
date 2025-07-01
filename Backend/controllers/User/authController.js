@@ -171,18 +171,20 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
 
 exports.forgotPassword = errorHandling(async (req, res, next) => {
     const { email, newPassword } = req.body;
-    console.log("REQ BODY ===>", req.body);
     
-        const user = await User.findOne({ email });
-        if (!user) return next(createError(404, "User not found" ));
+    const user = await User.findOne({ email });
+    if (!user) return next(createError(404, "User not found" ));
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+            const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+        return res.status(400).json({ message: "New password is the same as the old password" });
+    }
 
-        user.password = hashedPassword;
-        await user.save();
-
-        res.json({ message: "Password updated successfully" });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
     
+    res.json({ message: "Password updated successfully" });
 })
 
 

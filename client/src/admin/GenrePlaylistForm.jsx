@@ -125,22 +125,29 @@ const onSubmit = async (data) => {
                 key={i}
                 className="flex items-center gap-4 p-4 rounded-md bg-[#121212] border border-[#696969]"
               >
-                <div className="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex items-center justify-center">
-                  {p.image ? (
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-sm">No Image</span>
-                  )}
+                <div className="flex justify-between w-full">
+                  <div className="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex items-center justify-center">
+                    {p.image ? (
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-sm">No Image</span>
+                    )}
+                  </div>
+                  <div className="flex-1 ml-2 flex flex-col justify-center">
+                    <h4 className="text-xl font-semibold">{p.name}</h4>
+                    <p className="text-sm text-gray-400">
+                      {p.description || "No description provided."}
+                    </p>
+                  </div>
+                <div >
+                    <button className="bg-red-600 p-2 rounded">
+                      Delete
+                    </button>
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-xl font-semibold">{p.name}</h4>
-                  <p className="text-sm text-gray-400">
-                    {p.description || "No description provided."}
-                  </p>
                 </div>
               </Link>
             ))}

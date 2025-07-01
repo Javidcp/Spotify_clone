@@ -6,6 +6,7 @@ import { Play, Pause, MoreHorizontal, Clock } from "lucide-react";
 import BottomPlayer from "../Player";
 import { useDispatch } from "react-redux";
 import { addRecentlyPlayedArtist  } from "../../redux/recentlyPlayedPlaylistsSlice";
+import Verify from '../../assets/tick.png'
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen }) => (
     <div
@@ -36,7 +37,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
                 <div className={`font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`}>
                     {song.title}
                 </div>
-                <div className="text-sm text-gray-400 truncate">{song.artist?.map(a => a.name).join(", ") || 'Unknown'}</div>
+                <div className="text-sm text-gray-400 truncate">{song.artist.map(a => a.name).join(", ") || 'Unknown'}</div>
             </div>
         </div>
 
@@ -169,7 +170,7 @@ const ArtistPage = () => {
     return (
         <div className="bg-[#121212] text-white min-h-screen">
             <div>
-                <div className="flex items-center space-x-4 bg-emerald-950">
+                <div className="flex items-center space-x-4 bg-emerald-950 p-5">
                     <div className="w-48 h-48 bg-emerald-950 rounded-full overflow-hidden shadow-2xl">
                         <img 
                             src={artist.image} 
@@ -179,10 +180,11 @@ const ArtistPage = () => {
                     </div>
                     <div className="space-y-4">
                         <div className="flex items-center space-x-2">
+                            <img src={Verify} className="w-4" alt="" />
                             <span className="text-sm text-gray-300">Verified Artist</span>
                         </div>
                         <h1 className="text-6xl font-bold">{artist.name}</h1>
-                        <p className="text-gray-300 text-lg">{artist.monthlyListeners} monthly listeners</p>
+                        {/* <p className="text-gray-300 text-lg">{artist.monthlyListeners} monthly listeners</p> */}
                     </div>
                 </div>
             </div>

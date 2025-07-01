@@ -1,19 +1,26 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, Shuffle, Plus, Download, MoreHorizontal, Clock, List } from 'lucide-react';
 import { usePlayer } from '../hooks/redux';
 import api from '../utils/axios';
 import { useParams } from 'react-router-dom';
+import BottomPlayer from './Player';
 
 export default function SingleSong( ) {
-  const {
-    currentTrack,
-    isPlaying,
-    currentTime,
-    duration,
-    togglePlay,
-    setCurrentTrack,
-    formatTime
-  } = usePlayer();
+const {
+  currentTrackId,
+  currentPlaylistId,
+  currentTrackIndex,
+  isPlaying,
+  playTrack,
+  playPause,
+  switchPlaylist,
+  currentTrack,
+  formatTime,
+  currentTime,
+  duration,
+} = usePlayer();
+
 
   const { songId } = useParams();
   const [songData, setSongData] = useState(null);
@@ -32,32 +39,34 @@ export default function SingleSong( ) {
     };
     fetchSong();
   }, [songId]);;
-// 
+
+const handlePlay = () => {
+  if (!songData) return;
+
+  const playlistId = `single-${songData._id}`;
+  const songObj = {
+    ...songData,
+    id: songData._id,
+    audioUrl: songData.audioUrl || songData.url,
+  };
+
+  const songList = [songObj];
+
+  if (currentPlaylistId !== playlistId) {
+    switchPlaylist(playlistId, songList);
+    setTimeout(() => {
+      playTrack(songData._id, 0); 
+    }, 100);
+  } else {
+    if (currentTrackId === songData._id) {
+      playPause();
+    } else {
+      playTrack(songData._id, 0);
+    }
+  }
+};
+
 const isCurrentSongPlaying = songData && currentTrack?._id === songData._id && isPlaying;
-
-
-//   const handlePlayPause = () => {
-//     if (currentTrack?.id === localSongData.id) {
-//       togglePlay();
-//     } else {
-//       setCurrentTrack({
-//         id: localSongData.id,
-//         title: localSongData.title,
-//         artist: localSongData.artists,
-//         audioUrl: localSongData.audioUrl,
-//         image: localSongData.image,
-//         duration: localSongData.durationSeconds
-//       });
-//     }
-//   };
-
-//   const getGradientColor = () => {
-//     const songTitle = localSongData.title.toLowerCase();
-//     if (songTitle.includes('kesariya')) return 'from-red-800 via-red-900 to-black';
-//     if (songTitle.includes('love') || songTitle.includes('pyaar')) return 'from-pink-800 via-pink-900 to-black';
-//     if (songTitle.includes('dance') || songTitle.includes('party')) return 'from-orange-800 via-orange-900 to-black';
-//     return 'from-purple-800 via-purple-900 to-black';
-//   };
 
 if (loading) {
   return <div className="text-white p-8">Loading...</div>;
@@ -68,8 +77,7 @@ if (!songData) {
 }
 
   return (
-    <div className={`bg-[#121212]  min-h-screen text-white`}>
-      {/* Header */}
+    <div className={`bg-[#121212]  text-white`}>
       <div className="flex items-end p-8 pb-6 bg-red-900">
         <div className="w-60 h-60 mr-6 shadow-2xl">
           <img 
@@ -86,28 +94,26 @@ if (!songData) {
           </h1>
           <div className="flex items-center text-sm text-gray-300 flex-wrap">
             {songData.artist.map((artist, i) => (
-  <React.Fragment key={artist._id || i}>
-    <span className={i === 0 ? "font-medium text-white" : ""}>
-      {artist.name}
-    </span>
-  </React.Fragment>
-))}
-
+              <React.Fragment key={artist._id || i}>
+                <span className={i === 0 ? "font-medium text-white" : ""}>
+                  {artist.name}
+                </span>
+              </React.Fragment>
+            ))}
             <span className="mx-1">•</span>
-            <span>{songData.year}</span>
+            <span>{songData.createdAt.slice(0,4)}</span>
             <span className="mx-1">•</span>
-            <span>1 song, {songData.duration}</span>
+            <span>1 song - {songData.duration}</span>
           </div>
         </div>
       </div>
 
-      {/* Controls */}
       <div className="px-8 pb-6  bg-gradient-to-b from-red-900 to-red-900/50">
         <div className="flex items-center gap-6">
           <button
-            // onClick={handlePlayPause}
+            onClick={handlePlay}
             className="bg-green-500 hover:bg-green-400 transition-colors rounded-full p-4"
-            disabled={!songData.audioUrl}
+            disabled={!songData.url}
           >
             {isCurrentSongPlaying ?
               <Pause className="w-6 h-6 text-black fill-black" /> :
@@ -127,15 +133,14 @@ if (!songData) {
         </div>
       </div>
 
-      {/* Song List */}
       <div className="px-8">
         <div className="flex items-center justify-between py-2 border-b border-gray-700 mb-2">
           <div className="flex items-center text-gray-400 text-sm">
-            <span className="w-8 text-center">#</span>
+            <span className="w-8 text-center"></span>
             <span className="ml-4">Title</span>
           </div>
           <div className="flex items-center gap-8">
-            {/* <span className="text-gray-400 text-sm">Plays</span> */}
+            <span className="text-gray-400 text-sm">Plays</span>
             <Clock className="w-4 h-4 text-gray-400" />
             <span></span>
             <span></span>
@@ -143,12 +148,11 @@ if (!songData) {
           </div>
         </div>
 
-        {/* Song Row */}
         <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-[#191919] hover:bg-opacity-10 transition-colors group">
           <div className="flex items-center flex-1">
             <div className="w-8 text-center">
               <button
-                // onClick={handlePlayPause}
+                onClick={handlePlay}
                 className="opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 {isCurrentSongPlaying ?
@@ -156,7 +160,6 @@ if (!songData) {
                   <Play className="w-4 h-4 text-white fill-white" />
                 }
               </button>
-              <span className="group-hover:opacity-0 text-gray-400">1</span>
             </div>
 
             <div className="ml-4 flex items-center">
@@ -174,10 +177,8 @@ if (!songData) {
           </div>
 
           <div className="flex items-center gap-8">
-            {/* <span className="text-gray-400 text-sm">{songData.plays}</span> */}
             <span className="text-gray-400 text-sm">{songData.duration}</span>
-            
-                <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button className="opacity-0 group-hover:opacity-100 transition-opacity">
               <Plus className="w-4 h-4 text-gray-400 hover:text-white" />
             </button>
             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -187,32 +188,14 @@ if (!songData) {
           </div>
         </div>
       </div>
-
-      {/* Progress Bar */}
-      {isCurrentSongPlaying && (
-        <div className="fixed bottom-0 left-0 right-0 bg-black bg-opacity-90 p-4">
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-400 w-10">{formatTime(currentTime || 0)}</span>
-            <div className="flex-1 bg-gray-600 rounded-full h-1">
-              <div
-                className="bg-white rounded-full h-1 transition-all duration-300"
-                style={{ width: duration ? `${((currentTime || 0) / duration) * 100}%` : '0%' }}
-              ></div>
-            </div>
-            <span className="text-xs text-gray-400 w-10">
-              {formatTime(duration) || songData.duration}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* No Audio Warning */}
-      {!songData.audioUrl && (
-        <div className="px-8 py-4">
-          <div className="bg-yellow-600 bg-opacity-20 border border-yellow-600 rounded-lg p-4">
-            <p className="text-yellow-200">⚠️ Audio file not available for this track</p>
-          </div>
-        </div>
+      {currentTrack && (
+        <BottomPlayer
+            songs={songData}
+            currentTrackId={currentTrackId}
+            currentTrackIndex={currentTrackIndex}
+            isPlaying={isPlaying}
+            handlePlay={handlePlay}
+        />
       )}
     </div>
   );

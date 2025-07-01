@@ -41,7 +41,6 @@ import GenrePlaylistForm from './admin/GenrePlaylistForm';
 import GenreInside from './admin/GenreInside';
 import EditSong from './admin/EditSong';
 
-// Import the user-specific actions (remove the old ones)
 import { setCurrentUser as setCurrentUserArtists } from './redux/recentlyPlayedArtistsSlice';
 import { setCurrentUser as setCurrentUserPlaylists } from './redux/recentlyPlayedPlaylistsSlice';
 import { clearUserSession as clearArtistsSession } from './redux/recentlyPlayedArtistsSlice';
@@ -84,17 +83,12 @@ const router = createHashRouter([
   ] }
 ])
 
-// Fixed App.js - Ensure user is set before navigation
-
 const App = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
 
-  // Set user context immediately when user data is available
   useEffect(() => {
     if (user && user._id) {
-      console.log('Setting user for recently played slices:', user._id);
-      // Set user context for both recently played slices
       dispatch(setCurrentUserPlaylists(user._id));
       dispatch(setCurrentUserArtists(user._id));
     }
@@ -103,7 +97,6 @@ const App = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     
-    // Load saved user first
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
@@ -111,7 +104,6 @@ const App = () => {
         dispatch(setUser(userData));
         dispatch(setAuth(true));
         
-        // Set user context for recently played data immediately
         if (userData._id) {
           dispatch(setCurrentUserArtists(userData._id));
           dispatch(setCurrentUserPlaylists(userData._id));
@@ -139,7 +131,6 @@ const App = () => {
         dispatch(setAuth(true));
         localStorage.setItem('user', JSON.stringify(res.data));
         
-        // Set user context for recently played data
         if (res.data._id) {
           dispatch(setCurrentUserArtists(res.data._id));
           dispatch(setCurrentUserPlaylists(res.data._id));
@@ -151,7 +142,6 @@ const App = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         
-        // Clear user context on auth failure
         dispatch(clearArtistsSession());
         dispatch(clearPlaylistsSession());
         

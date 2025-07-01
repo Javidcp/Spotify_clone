@@ -1,12 +1,16 @@
 /* eslint-disable no-unused-vars */
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Expand } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePlayer } from '../hooks/redux';
 import { useNavigate } from 'react-router-dom';
 
+
 const BottomPlayer = () => {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const navigate = useNavigate();
+  const [localLoading, setLocalLoading] = useState(false);
+
+
 
   const {
     currentTrack,
@@ -48,6 +52,13 @@ const BottomPlayer = () => {
     };
   }, [currentTrack, audioRef, setDuration, updateCurrentTime]);
 
+  const handlePlayPause = () => {
+  setLocalLoading(true);
+  playPause();
+  setTimeout(() => setLocalLoading(false), 400);
+};
+
+
   if (!currentTrack || !currentTrack.id) return null;
 
   const formatTime = (time) => {
@@ -72,10 +83,10 @@ const BottomPlayer = () => {
   const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#181818] border-t border-[#282828] px-4 py-3 flex items-center justify-between z-50">
-      <div className="flex items-center space-x-3 w-1/3 min-w-0">
-        <div className="w-14 h-14 bg-gray-700 rounded overflow-hidden flex-shrink-0">
-          <img src={currentTrack.coverImage} alt={currentTrack.title} className="w-full h-full object-cover" />
+    <div className="fixed bottom-0 left-0 right-0 bg-[#181818] border-t border-[#282828] px-4 py-3 flex flex-col md:flex-row md:items-center justify-between z-50">
+      <div className="flex md:items-center space-x-3 w-full md:w-1/3 min-w-0">
+        <div className="md:w-14 w-10 md:h-14 h-10 rounded overflow-hidden flex-shrink-0">
+          <img src={currentTrack.coverImage} alt={currentTrack.title} className="md:w-full md:h-full w-10 h-10 object-cover" />
         </div>
         <div className="min-w-0">
           <div className="text-white font-medium truncate text-sm">{currentTrack.title}</div>
@@ -85,19 +96,19 @@ const BottomPlayer = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center w-1/3 max-w-2xl min-w-0">
+      <div className="flex flex-col items-center w-full md:w-1/3 max-w-2xl min-w-0">
         <div className="flex items-center space-x-4 mb-2">
-          <button onClick={skipPrevious} className="text-gray-400 hover:text-white transition-colors" disabled={isLoading}>
+          <button onClick={skipPrevious} className="text-gray-400 hover:text-white transition-colors" disabled={localLoading}>
             <SkipBack className="w-5 h-5" />
           </button>
 
           <button
-            onClick={playPause}
+            onClick={handlePlayPause}
             className="bg-white hover:bg-gray-200 rounded-full flex items-center justify-center w-8 h-8 transition-all"
-            disabled={isLoading}
+            disabled={localLoading}
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
-            {isLoading ? (
+            {localLoading ? (
               <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
             ) : isPlaying ? (
               <Pause className="w-4 h-4 text-black fill-black" />
@@ -106,7 +117,7 @@ const BottomPlayer = () => {
             )}
           </button>
 
-          <button onClick={skipNext} className="text-gray-400 hover:text-white transition-colors" disabled={isLoading}>
+          <button onClick={skipNext} className="text-gray-400 hover:text-white transition-colors" disabled={localLoading}>
             <SkipForward className="w-5 h-5" />
           </button>
         </div>
@@ -131,7 +142,7 @@ const BottomPlayer = () => {
         </div>
       </div>
 
-      <div className="flex items-center flex-1 justify-end space-x-3 min-w-0">
+      <div className="hidden md:flex items-center flex-1 justify-end space-x-3 min-w-0">
         <div className="flex items-center space-x-2 relative">
           <button
             onClick={toggleMuteVolume}

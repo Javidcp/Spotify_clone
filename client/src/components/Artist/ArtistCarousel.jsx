@@ -56,8 +56,8 @@ const SpotifyArtistCarousel = () => {
         <div className="w-full mx-auto">
             <div className="mb-6 flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold mb-2">Popular Artists</h1>
-                    <p className="text-gray-400">Artists you might like</p>
+                    <h1 className="text-md md:text-3xl font-bold mb-2">Popular Artists</h1>
+                    <p className="text-xs md:text-lg text-gray-400">Artists you might like</p>
                 </div>
                 <button
                     onClick={() => navigate('/artist')}
@@ -96,19 +96,19 @@ const SpotifyArtistCarousel = () => {
                 <Link
                     to={`/artist/${artist._id}`}
                     key={artist._id}
-                    className="flex-shrink-0 w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card"
+                    className="flex-shrink-0 md:w-52 hover:bg-[#1d1d1d] rounded-lg p-4 transition-all duration-300 cursor-pointer group/card"
                 >
                     <div className="relative mb-4">
                     <img
                         src={artist.image}
                         alt={artist.name}
-                        className="w-full aspect-square object-cover rounded-full"
+                        className="md:w-full aspect-square w-30 object-cover rounded-full"
                     />
                     </div>
                     
                     <div className="">
-                    <h3 className="text-md mb-2 truncate">{artist.name}</h3>
-                    <p className="text-gray-400 text-sm">Artist</p>
+                    <h3 className="text-xs md:text-md mb-2 truncate">{artist.name}</h3>
+                    <p className="text-gray-400 text-[12px] md:text-sm">Artist</p>
                     </div>
                 </Link>
                 ))}
